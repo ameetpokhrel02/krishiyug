@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+
 import { Outlet } from 'react-router-dom';
 import { AIChatbot } from '@/components/chatbot/ai-chatbot';
 

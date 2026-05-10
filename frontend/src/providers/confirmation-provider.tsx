@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { ConfirmationDialog, ConfirmationType } from '@/components/dialogs/confirmation-dialog';
+import { createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ConfirmationDialog } from '@/components/dialogs/confirmation-dialog';
+import type { ConfirmationType } from '@/components/dialogs/confirmation-dialog';
 
 interface ConfirmationOptions {
   title: string;

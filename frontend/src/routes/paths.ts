@@ -1,9 +1,13 @@
 export const PATHS = {
   HOME: '/',
   AUTH: {
-    LOGIN: '/login',
-    REGISTER: '/register',
-    FORGOT_PASSWORD: '/forgot-password',
+    WELCOME: '/auth/welcome',
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    ROLE_SELECTION: '/auth/role-selection',
+    OTP_VERIFICATION: '/auth/verify-otp',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
   },
   DASHBOARD: {
     FARMER: '/dashboard/farmer',
