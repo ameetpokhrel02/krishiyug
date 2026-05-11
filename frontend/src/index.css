@@ -7,7 +7,7 @@
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
 
@@ -26,7 +26,7 @@
 
   --color-border: var(--border);
   --color-input: var(--input);
-  
+
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 }
@@ -84,10 +84,17 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-sans;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading font-semibold tracking-tight;
   }
 }
