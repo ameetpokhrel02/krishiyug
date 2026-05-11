@@ -14,6 +14,7 @@ import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { OtpVerification } from '@/pages/auth/OtpVerification';
 import { ForgotPassword } from '@/pages/auth/ForgotPassword';
 import { ResetPassword } from '@/pages/auth/ResetPassword';
+import { InsuranceDashboard } from '@/pages/dashboard/insurance/InsuranceDashboard';
 
 const router = createBrowserRouter([
   {
@@ -47,21 +48,13 @@ const router = createBrowserRouter([
               },
             ],
           },
+
           {
-            element: <RoleGuard allowedRoles={['WITNESS']} />,
+            element: <RoleGuard allowedRoles={['WARD']} />,
             children: [
               {
-                path: PATHS.DASHBOARD.WITNESS,
-                element: <DashboardHome role="Witness" />,
-              },
-            ],
-          },
-          {
-            element: <RoleGuard allowedRoles={['PALIKA']} />,
-            children: [
-              {
-                path: PATHS.DASHBOARD.PALIKA,
-                element: <DashboardHome role="Palika Officer" />,
+                path: PATHS.DASHBOARD.WARD,
+                element: <DashboardHome role="Ward Officer" />,
               },
             ],
           },
@@ -70,7 +63,7 @@ const router = createBrowserRouter([
             children: [
               {
                 path: PATHS.DASHBOARD.INSURANCE,
-                element: <DashboardHome role="Insurance Officer" />,
+                element: <InsuranceDashboard />,
               },
             ],
           },

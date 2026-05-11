@@ -7,7 +7,7 @@ export const StakeholderSection = () => {
 
   const tabs = [
     { id: 'farmer', label: 'Farmers', icon: Tractor },
-    { id: 'palika', label: 'Palika', icon: Building2 },
+    { id: 'ward', label: 'Ward', icon: Building2 },
     { id: 'insurance', label: 'Insurance', icon: Shield },
     { id: 'witness', label: 'Witnesses', icon: Eye },
   ];
@@ -23,7 +23,7 @@ export const StakeholderSection = () => {
       ],
       imageColor: 'bg-emerald-100',
     },
-    palika: {
+    ward: {
       title: 'Streamlined Verification Workflow',
       benefits: [
         'Centralized dashboard for all local claims.',
@@ -122,7 +122,7 @@ export const StakeholderSection = () => {
                    className="relative z-10 w-48 h-48 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-white/50"
                  >
                     {activeTab === 'farmer' && <Tractor className="w-20 h-20 text-emerald-500" />}
-                    {activeTab === 'palika' && <Building2 className="w-20 h-20 text-blue-500" />}
+                    {activeTab === 'ward' && <Building2 className="w-20 h-20 text-blue-500" />}
                     {activeTab === 'insurance' && <Shield className="w-20 h-20 text-indigo-500" />}
                     {activeTab === 'witness' && <Eye className="w-20 h-20 text-amber-500" />}
                  </motion.div>

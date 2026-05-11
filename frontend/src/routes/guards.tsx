@@ -3,8 +3,9 @@ import { PATHS } from './paths';
 
 // This is a placeholder for actual auth logic
 const useAuth = () => {
-  // Mocking auth for now
-  return { isAuthenticated: true, user: { role: 'FARMER' } };
+  // Mocking auth for development - can be overridden by localStorage
+  const mockRole = localStorage.getItem('mockRole') || 'FARMER';
+  return { isAuthenticated: true, user: { role: mockRole } };
 };
 
 export const AuthGuard = () => {

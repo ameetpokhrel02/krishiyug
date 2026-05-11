@@ -20,7 +20,7 @@ export const ProblemSection = () => {
     },
     {
       title: 'Low Transparency',
-      description: 'Farmers have no visibility into their claim status once submitted to the Palika.',
+      description: 'Farmers have no visibility into their claim status once submitted to the Ward.',
       icon: FileWarning,
     },
     {

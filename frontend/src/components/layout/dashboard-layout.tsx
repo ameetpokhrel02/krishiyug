@@ -1,5 +1,10 @@
 
 import { Outlet } from 'react-router-dom';
+import { 
+  LayoutDashboard, FileText, ShieldCheck, 
+  Users, BarChart3, Bell, Settings, LogOut,
+  ScanSearch 
+} from 'lucide-react';
 import { AIChatbot } from '@/components/chatbot/ai-chatbot';
 
 export const DashboardLayout = () => {
@@ -11,13 +16,45 @@ export const DashboardLayout = () => {
           <h2 className="text-xl font-bold text-primary">Krishiyug AI</h2>
         </div>
         <nav className="mt-6 px-4">
-          {/* Navigation links will go here */}
-          <div className="space-y-1">
-            <div className="h-10 px-4 flex items-center rounded-lg bg-primary/10 text-primary font-medium cursor-pointer">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold cursor-pointer shadow-sm transition-all">
+              <LayoutDashboard className="w-5 h-5" />
               Dashboard
             </div>
-            <div className="h-10 px-4 flex items-center rounded-lg hover:bg-muted text-muted-foreground transition-colors cursor-pointer">
-              Claims
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <FileText className="w-5 h-5" />
+              Claims Queue
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <ShieldCheck className="w-5 h-5" />
+              Active Policies
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <Users className="w-5 h-5" />
+              Farmer Database
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <BarChart3 className="w-5 h-5" />
+              Analytics
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <ScanSearch className="w-5 h-5" />
+              Fraud Detection
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <Bell className="w-5 h-5" />
+              Notifications
+            </div>
+          </div>
+          
+          <div className="mt-12 pt-6 border-t border-border">
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer">
+              <Settings className="w-5 h-5" />
+              Settings
+            </div>
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-rose-50 text-muted-foreground hover:text-rose-600 transition-all cursor-pointer">
+              <LogOut className="w-5 h-5" />
+              Logout
             </div>
           </div>
         </nav>

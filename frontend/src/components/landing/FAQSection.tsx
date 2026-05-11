@@ -12,7 +12,7 @@ export const FAQSection = () => {
     },
     {
       question: 'Do farmers need a smartphone to use this?',
-      answer: 'While a smartphone provides the best experience, farmers can also file claims through SMS, voice calls, or with the assistance of a Palika officer.'
+      answer: 'While a smartphone provides the best experience, farmers can also file claims through SMS, voice calls, or with the assistance of a Ward officer.'
     },
     {
       question: 'Is my data secure?',

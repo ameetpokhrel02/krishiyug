@@ -59,7 +59,7 @@ export const HeroSection = () => {
             <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 font-medium">
               <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/50 shadow-sm">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                <span>Palika Verified</span>
+                <span>Ward Verified</span>
               </div>
               <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/50 shadow-sm">
                 <BotMessageSquare className="w-4 h-4 text-indigo-500" />

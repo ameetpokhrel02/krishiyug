@@ -21,7 +21,7 @@ export const HowItWorksSection = () => {
     },
     {
       num: '03',
-      title: 'Palika & Witness Verification',
+      title: 'Ward & Witness Verification',
       description: 'Local authorities and witnesses digitally sign off on the claim\'s authenticity securely.',
       icon: CheckSquare,
       color: 'from-amber-500 to-orange-600',

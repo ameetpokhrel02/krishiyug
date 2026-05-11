@@ -28,7 +28,12 @@ export const RegisterPage = () => {
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(PATHS.AUTH.OTP_VERIFICATION);
+    if (role === 'insurance') {
+      localStorage.setItem('mockRole', 'INSURANCE');
+      navigate(PATHS.DASHBOARD.INSURANCE);
+    } else {
+      navigate(PATHS.AUTH.OTP_VERIFICATION);
+    }
   };
 
   const detectLocation = () => {
@@ -110,7 +115,7 @@ export const RegisterPage = () => {
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-slate-700">Municipality</label>
-                <input type="text" name="municipality" value={formData.municipality || ''} onChange={handleInputChange} required className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Municipality/Palika" />
+                <input type="text" name="municipality" value={formData.municipality || ''} onChange={handleInputChange} required className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Municipality/Ward" />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-sm font-medium text-slate-700">Insurance Number (Optional)</label>
@@ -119,7 +124,7 @@ export const RegisterPage = () => {
             </div>
           </>
           );
-      case 'palika':
+      case 'ward':
         return (
           <>
             <div className="grid grid-cols-2 gap-4">
@@ -144,7 +149,7 @@ export const RegisterPage = () => {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-sm font-medium text-slate-700">Office Email</label>
-                <input type="email" name="email" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="officer@palika.gov.np" />
+                <input type="email" name="email" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="officer@ward.gov.np" />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-sm font-medium text-slate-700">Phone</label>

@@ -44,7 +44,7 @@ export const AuthLayout = () => {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-indigo-200 text-lg max-w-md leading-relaxed"
           >
-            Join thousands of farmers, Palikas, and insurance companies building a transparent, intelligent claims ecosystem.
+            Join thousands of farmers, Wards, and insurance companies building a transparent, intelligent claims ecosystem.
           </motion.p>
         </div>
 
@@ -64,7 +64,7 @@ export const AuthLayout = () => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-white">Claim Verified</p>
-                      <p className="text-xs text-emerald-300">Palika Approved</p>
+                      <p className="text-xs text-emerald-300">Ward Approved</p>
                     </div>
                  </div>
                  <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">

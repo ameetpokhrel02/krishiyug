@@ -4,7 +4,7 @@ import { ShieldCheck, Cpu, Handshake, Activity } from 'lucide-react';
 export const TrustSection = () => {
   const partners = [
     { 
-      name: 'Palika Verification', 
+      name: 'Ward Verification', 
       role: 'Local Government', 
       icon: ShieldCheck, 
       color: 'text-blue-600', 

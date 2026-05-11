@@ -20,7 +20,7 @@ export const WorkflowSection = () => {
            {[
              { title: 'Farmer submits data', user: 'Farmer', side: 'left' },
              { title: 'AI validates evidence', user: 'System', side: 'right' },
-             { title: 'Palika Officer reviews', user: 'Palika', side: 'left' },
+             { title: 'Ward Officer reviews', user: 'Ward', side: 'left' },
              { title: 'Witnesses attest', user: 'Witness', side: 'right' },
              { title: 'Insurance approves payout', user: 'Insurance', side: 'left' },
            ].map((step, idx) => (

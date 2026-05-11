@@ -11,8 +11,8 @@ export const PATHS = {
   },
   DASHBOARD: {
     FARMER: '/dashboard/farmer',
-    WITNESS: '/dashboard/witness',
-    PALIKA: '/dashboard/palika',
+
+    WARD: '/dashboard/ward',
     INSURANCE: '/dashboard/insurance',
     ADMIN: '/dashboard/admin',
   },

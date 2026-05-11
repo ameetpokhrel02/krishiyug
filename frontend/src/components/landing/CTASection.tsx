@@ -13,7 +13,7 @@ export const CTASection = () => {
           Ready to Transform Agricultural Insurance?
         </h2>
         <p className="text-xl text-indigo-200 mb-10 max-w-2xl mx-auto">
-          Join farmers, Palikas, and insurance companies building a transparent, AI-driven future for Nepal's agriculture.
+          Join farmers, Wards, and insurance companies building a transparent, AI-driven future for Nepal's agriculture.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

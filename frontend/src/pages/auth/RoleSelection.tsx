@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Tractor, Building2, Shield, Eye, Users, ShieldAlert } from 'lucide-react';
+import { Tractor, Building2, Shield, ShieldAlert } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATHS } from '@/routes/paths';
 
@@ -8,10 +8,8 @@ export const RoleSelection = () => {
 
   const roles = [
     { id: 'farmer', title: 'Farmer', icon: Tractor, desc: 'File claims & track status', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
-    { id: 'palika', title: 'Palika Officer', icon: Building2, desc: 'Verify local claims', color: 'bg-blue-50 text-blue-600 border-blue-200' },
+    { id: 'ward', title: 'Ward Officer', icon: Building2, desc: 'Verify local claims', color: 'bg-blue-50 text-blue-600 border-blue-200' },
     { id: 'insurance', title: 'Insurance Officer', icon: Shield, desc: 'Process payouts', color: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
-    { id: 'witness', title: 'Witness', icon: Eye, desc: 'Attest local claims', color: 'bg-amber-50 text-amber-600 border-amber-200' },
-    { id: 'cooperative', title: 'Cooperative Agent', icon: Users, desc: 'Manage member claims', color: 'bg-purple-50 text-purple-600 border-purple-200' },
     { id: 'admin', title: 'Admin', icon: ShieldAlert, desc: 'Platform management', color: 'bg-slate-100 text-slate-700 border-slate-300' },
   ];
 
