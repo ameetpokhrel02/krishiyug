@@ -91,14 +91,20 @@ export const RegisterPage = () => {
         }
       });
 
-      if (response?.success || response?.data?.token) {
-        const token = response?.data?.token || response?.token;
-        const user = response?.data?.user || response?.user;
-        
+      // Response structure: { data: { statusCode, success, message, data: { user, token, redirectTo } } }
+      const responseData = response?.data;
+      const token = responseData?.data?.token;
+      const user = responseData?.data?.user;
+      const redirectTo = responseData?.data?.redirectTo;
+
+      if (responseData?.success && token && user) {
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
         toast.success('Registration successful!');
-        navigate(PATHS.FARMER.OVERVIEW);
+        
+        // Route to farmer dashboard or use the backend's redirectTo
+        const path = redirectTo || PATHS.FARMER.OVERVIEW;
+        navigate(path);
       }
     } catch (err: any) {
       const errorMessage = err?.message || 'Registration failed. Try again.';
