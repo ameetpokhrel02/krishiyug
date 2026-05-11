@@ -47,7 +47,16 @@ export const PATHS = {
   },
   DASHBOARD: {
     FARMER: '/farmer',
-    INSURANCE: '/insurance',
+    farmer: '/farmer',
+    INSURANCE_COMPANY: '/insurance',
+    insurance_company: '/insurance',
     ADMIN: '/admin',
+    admin: '/admin',
+    WARD_OFFICIAL: '/ward',
+    ward_official: '/ward',
+    INSURANCE_AGENT: '/agent',
+    insurance_agent: '/agent',
+    INSURANCE_OFFICER: '/insurance',
+    INSURANCE: '/insurance',
   },
 } as const;
