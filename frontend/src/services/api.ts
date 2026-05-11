@@ -52,7 +52,7 @@ export const authAPI = {
       farmType: 'livestock' | 'crop';
       farmSize: number;
       cropTypes?: string[];
-      location: { district: string; village: string; region?: string; palika?: string };
+      location: { district: string; village: string; region?: string; palika?: string; ward?: string; lat?: number; lng?: number };
       livestockDetails?: { earTags: string[] };
     };
     companyName?: string;
