@@ -16,7 +16,7 @@ export const AuthLayout = () => {
             Krishiyug
           </span>
         </Link>
-        
+
         <div className="w-full max-w-md mx-auto mt-16">
           <Outlet />
         </div>
@@ -30,7 +30,7 @@ export const AuthLayout = () => {
         <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[500px] h-[500px] bg-amber-500/10 blur-[100px] rounded-full -z-10" />
 
         <div className="relative z-10 mt-12">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -38,7 +38,7 @@ export const AuthLayout = () => {
           >
             Empowering Nepal's <br /> Agriculture with AI
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -50,52 +50,73 @@ export const AuthLayout = () => {
 
         {/* Abstract Floating Cards Visual */}
         <div className="relative z-10 flex-1 flex items-center justify-center mt-12 h-full w-full">
-           <motion.div 
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={{ opacity: 1, scale: 1 }}
-             transition={{ duration: 1, delay: 0.5, type: 'spring' }}
-             className="relative w-full max-w-sm"
-           >
-              {/* Card 1 */}
-              <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-2xl shadow-2xl transform rotate-6">
-                 <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                       <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">Claim Verified</p>
-                      <p className="text-xs text-emerald-300">Ward Approved</p>
-                    </div>
-                 </div>
-                 <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="w-full h-full bg-emerald-400 rounded-full" />
-                 </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5, type: 'spring' }}
+            className="relative w-full max-w-sm"
+          >
+            {/* Card 1 */}
+            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-2xl shadow-2xl transform rotate-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Claim Verified</p>
+                  <p className="text-xs text-emerald-300">Ward & Palika Approved</p>
+                </div>
               </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-emerald-400 rounded-full" />
+              </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5, type: 'spring' }}
+            className="relative w-full max-w-sm"
+          >
+            {/* Card 1 */}
+            <div className="absolute top-0 right-0 -mr-12 -mt-12 w-64 bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-2xl shadow-2xl transform rotate-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Claim Verified</p>
+                  <p className="text-xs text-emerald-300">Palika Approved</p>
+                </div>
+>>>>>>> 007160a (basic frontend setup)
+              </div>
+              <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-emerald-400 rounded-full" />
+              </div>
+            </div>
 
-              {/* Card 2 */}
-              <div className="relative z-10 bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-indigo-500/30">
-                 <div className="flex justify-between items-center mb-6">
-                   <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
-                      <Tractor className="w-6 h-6 text-amber-400" />
-                   </div>
-                   <div className="px-3 py-1 rounded-full bg-indigo-900/50 text-indigo-200 text-xs font-medium border border-indigo-500/30">
-                     Active Policy
-                   </div>
-                 </div>
-                 <h3 className="text-2xl font-bold text-white mb-2 font-heading">Livestock Insurance</h3>
-                 <p className="text-indigo-200 text-sm mb-6">Coverage active until Dec 2026</p>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-indigo-900/40 p-3 rounded-xl border border-indigo-700/50">
-                      <p className="text-xs text-indigo-300 mb-1">Insured Value</p>
-                      <p className="font-semibold text-white">Rs. 150,000</p>
-                    </div>
-                    <div className="bg-indigo-900/40 p-3 rounded-xl border border-indigo-700/50">
-                      <p className="text-xs text-indigo-300 mb-1">Status</p>
-                      <p className="font-semibold text-emerald-400">Secure</p>
-                    </div>
-                 </div>
+            {/* Card 2 */}
+            <div className="relative z-10 bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-indigo-500/30">
+              <div className="flex justify-between items-center mb-6">
+                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <Tractor className="w-6 h-6 text-amber-400" />
+                </div>
+                <div className="px-3 py-1 rounded-full bg-indigo-900/50 text-indigo-200 text-xs font-medium border border-indigo-500/30">
+                  Active Policy
+                </div>
               </div>
-           </motion.div>
+              <h3 className="text-2xl font-bold text-white mb-2 font-heading">Livestock Insurance</h3>
+              <p className="text-indigo-200 text-sm mb-6">Coverage active until Dec 2026</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-indigo-900/40 p-3 rounded-xl border border-indigo-700/50">
+                  <p className="text-xs text-indigo-300 mb-1">Insured Value</p>
+                  <p className="font-semibold text-white">Rs. 150,000</p>
+                </div>
+                <div className="bg-indigo-900/40 p-3 rounded-xl border border-indigo-700/50">
+                  <p className="text-xs text-indigo-300 mb-1">Status</p>
+                  <p className="font-semibold text-emerald-400">Secure</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
