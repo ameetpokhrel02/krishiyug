@@ -4,7 +4,7 @@ export const registerSchema = z
   .object({
     phoneNumber: z
       .string()
-      .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number (must start with 6-9 and be 10 digits)"),
+      .regex(/^[0-9]{10}$/, "Invalid phone number (must be 10 digits)"),
     password: z
       .string()
       .min(8, "Password must be at least 8 characters"),
@@ -37,20 +37,19 @@ export const registerSchema = z
   })
   .refine(
     (data) => {
-      if (data.role === "ward_official" && !data.wardNumber) return false;
       if (data.role === "insurance_company" && !data.companyName) return false;
       if (data.role === "farmer" && !data.farmerDetails) return false;
       return true;
     },
     {
-      message: "Role-specific fields are required: wardNumber for ward_official, companyName for insurance_company, farmerDetails for farmer",
+      message: "Role-specific fields are required: companyName for insurance_company, farmerDetails for farmer",
     }
   );
 
 export const loginSchema = z.object({
   phoneNumber: z
     .string()
-    .regex(/^[6-9]\d{9}$/, "Invalid Indian phone number"),
+    .regex(/^[0-9]{10}$/, "Invalid phone number (must be 10 digits)"),
   password: z
     .string()
     .min(1, "Password is required"),

@@ -9,6 +9,9 @@ import {
   rejectClaim,
   createInsuranceCompany,
   getDashboardStats,
+  getInsuranceCompanies,
+  getUsers,
+  provisionUser,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -31,5 +34,10 @@ router.post("/claims/reject", rejectClaim);
 
 // Insurance company management
 router.post("/insurance-company", createInsuranceCompany);
+router.get("/insurance-companies", getInsuranceCompanies);
+
+// User management
+router.get("/users", getUsers);
+router.post("/provision-user", provisionUser);
 
 export default router;

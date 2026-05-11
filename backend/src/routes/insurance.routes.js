@@ -6,6 +6,8 @@ import {
   getAllMyClaims,
   decideClaim,
   getInsuranceDashboard,
+  getMyPolicies,
+  getInsuredFarmers,
 } from "../controllers/insurance.controller.js";
 
 const router = express.Router();
@@ -21,5 +23,9 @@ router.get("/dashboard", getInsuranceDashboard);
 router.get("/claims/verified", getVerifiedClaims);
 router.get("/claims/all", getAllMyClaims);
 router.post("/claims/decide", decideClaim);
+
+// Policy and Farmer data
+router.get("/policies", getMyPolicies);
+router.get("/farmers", getInsuredFarmers);
 
 export default router;

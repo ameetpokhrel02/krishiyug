@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
       required: function() { return this.role !== 'admin'; },
       unique: false,
       trim: true,
-      match: [/^[6-9]\d{9}$/, "Please provide a valid Indian phone number"],
+      match: [/^[0-9]{10}$/, "Please provide a valid 10-digit phone number"],
       index: true,
     },
     email: {

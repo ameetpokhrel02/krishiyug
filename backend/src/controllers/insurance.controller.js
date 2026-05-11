@@ -152,3 +152,41 @@ export const getInsuranceDashboard = asyncHandler(async (req, res) => {
     )
   );
 });
+
+// Insurance company views their own policies
+export const getMyPolicies = asyncHandler(async (req, res) => {
+  const insuranceCompanyId = req.user._id;
+  const policies = await Policy.find({ insuranceCompanyId }).sort("-createdAt");
+
+  res.status(200).json(
+    new ApiResponse(200, policies, "Policies retrieved successfully")
+  );
+});
+
+// Insurance company views farmers associated with their policies (via claims)
+export const getInsuredFarmers = asyncHandler(async (req, res) => {
+  const insuranceCompanyId = req.user._id;
+
+  // Get all policies for this company
+  const policies = await Policy.find({ insuranceCompanyId });
+  const policyIds = policies.map(p => p._id);
+
+  // Find unique farmers who have claims for these policies
+  const claims = await Claim.find({ policyId: { $in: policyIds } })
+    .populate("farmerId", "name phoneNumber email farmerDetails createdAt")
+    .select("farmerId");
+
+  // Filter unique farmers
+  const uniqueFarmersMap = new Map();
+  claims.forEach(claim => {
+    if (claim.farmerId && !uniqueFarmersMap.has(claim.farmerId._id.toString())) {
+      uniqueFarmersMap.set(claim.farmerId._id.toString(), claim.farmerId);
+    }
+  });
+
+  const farmers = Array.from(uniqueFarmersMap.values());
+
+  res.status(200).json(
+    new ApiResponse(200, farmers, "Insured farmers retrieved successfully")
+  );
+});

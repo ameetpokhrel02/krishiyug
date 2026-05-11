@@ -52,14 +52,12 @@ export const register = asyncHandler(async (req, res) => {
 
   // Determine redirect path based on role
   const redirectPaths = {
-    farmer: "/farmer/dashboard",
-    admin: "/admin/dashboard",
-    insurance_company: "/insurance/dashboard",
-    ward_official: "/ward/dashboard",
-    insurance_agent: "/agent/dashboard",
+    farmer: "/farmer",
+    admin: "/admin",
+    insurance_company: "/insurance",
   };
 
-  const redirectTo = redirectPaths[user.role] || "/dashboard";
+  const redirectTo = redirectPaths[user.role] || "/";
 
   res.status(201).json(
     new ApiResponse(
@@ -111,14 +109,12 @@ export const login = asyncHandler(async (req, res) => {
 
   // Determine redirect path based on role
   const redirectPaths = {
-    farmer: "/farmer/dashboard",
-    admin: "/admin/dashboard",
-    insurance_company: "/insurance/dashboard",
-    ward_official: "/ward/dashboard",
-    insurance_agent: "/agent/dashboard",
+    farmer: "/farmer",
+    admin: "/admin",
+    insurance_company: "/insurance",
   };
 
-  const redirectTo = redirectPaths[user.role] || "/dashboard";
+  const redirectTo = redirectPaths[user.role] || "/";
 
   res.status(200).json(
     new ApiResponse(

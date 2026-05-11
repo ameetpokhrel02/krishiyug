@@ -233,6 +233,17 @@ export const createInsuranceCompany = asyncHandler(async (req, res) => {
   );
 });
 
+// Admin lists all insurance companies
+export const getInsuranceCompanies = asyncHandler(async (req, res) => {
+  const companies = await User.find({ role: "insurance_company" })
+    .select("name companyName phoneNumber createdAt")
+    .sort("-createdAt");
+
+  res.status(200).json(
+    new ApiResponse(200, companies, "Insurance companies retrieved successfully")
+  );
+});
+
 // Admin gets dashboard statistics
 export const getDashboardStats = asyncHandler(async (req, res) => {
   const totalClaims = await Claim.countDocuments();
@@ -260,5 +271,59 @@ export const getDashboardStats = asyncHandler(async (req, res) => {
       },
       "Dashboard statistics retrieved successfully"
     )
+  );
+});
+
+// Admin lists all users with optional role filter
+export const getUsers = asyncHandler(async (req, res) => {
+  const { role } = req.query;
+  const filter = role ? { role } : {};
+
+  const users = await User.find(filter)
+    .select("-password")
+    .sort("-createdAt");
+
+  res.status(200).json(
+    new ApiResponse(200, users, "Users retrieved successfully")
+  );
+});
+
+// Admin provisions a new internal user
+export const provisionUser = asyncHandler(async (req, res) => {
+  const { name, phoneNumber, email, password, role, companyName } = req.body;
+
+  // Validate role
+  const allowedRoles = ["admin", "ward_official", "insurance_company", "insurance_agent"];
+  if (!allowedRoles.includes(role)) {
+    throw new ApiError(400, "Invalid role for internal provisioning");
+  }
+
+  // Check if phone already exists
+  const existingPhone = await User.findOne({ phoneNumber });
+  if (existingPhone) {
+    throw new ApiError(409, "Phone number already registered");
+  }
+
+  // Check if email already exists
+  if (email) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      throw new ApiError(409, "Email already registered");
+    }
+  }
+
+  const user = await User.create({
+    name,
+    phoneNumber,
+    email,
+    password: password || "Krishiyug@123", // Default password if not provided
+    role,
+    companyName,
+  });
+
+  const response = user.toJSON();
+
+  res.status(201).json(
+    new ApiResponse(201, response, `User with role ${role} provisioned successfully`)
   );
 });
