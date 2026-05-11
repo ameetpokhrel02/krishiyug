@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, 
-  AlertTriangle, 
   CheckCircle2, 
   XCircle, 
-  Clock, 
   Eye, 
   ArrowRight,
   FileText,
@@ -13,7 +11,6 @@ import {
   MapPin,
   Calendar,
   Tag,
-  ExternalLink,
   ChevronLeft,
   Sparkles,
   Download

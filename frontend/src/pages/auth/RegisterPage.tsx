@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User, Phone, MapPin, ArrowRight, ShieldCheck, ChevronLeft, Locate, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PATHS } from '@/routes/paths';
@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  const locationState = useLocation().state;
   const [isDetecting, setIsDetecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,9 +18,6 @@ export const RegisterPage = () => {
     palika: '',
     wardNumber: '',
   });
-
-  const [location, setLocation] = useState({ district: '', palika: '', ward: '' });
-
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
@@ -33,23 +29,18 @@ export const RegisterPage = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const response = await locationAPI.reverseGeocode(latitude, longitude);
+          const response: any = await locationAPI.reverseGeocode(latitude, longitude);
 
-          if (response.success) {
-            setLocation({
-              district: response.data.district || '',
-              palika: response.data.palika || '',
-              ward: response.data.ward || ''
-            });
+          if (response?.success || response?.data) {
             setFormData(prev => ({
               ...prev,
-              district: response.data.district || '',
-              palika: response.data.palika || '',
-              wardNumber: response.data.ward || ''
+              district: response?.data?.district || '',
+              palika: response?.data?.palika || '',
+              wardNumber: response?.data?.ward || ''
             }));
             toast.success('Location detected successfully!');
           } else {
-            toast.error(response.message || 'Failed to detect location');
+            toast.error(response?.message || 'Failed to detect location');
           }
         } catch (error: any) {
           console.error("Location Detection Error:", error);
@@ -86,7 +77,7 @@ export const RegisterPage = () => {
 
     setIsLoading(true);
     try {
-      const response = await authAPI.register({
+      const response: any = await authAPI.register({
         name: formData.name,
         phoneNumber: formData.phoneNumber,
         password: formData.password,

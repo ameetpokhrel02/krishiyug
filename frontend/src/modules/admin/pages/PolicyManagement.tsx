@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Plus, 
   Search, 
   Edit2, 
   Trash2, 
   Copy, 
-  ExternalLink,
   ShieldCheck,
   Leaf,
   Baby,
@@ -22,7 +21,7 @@ const mockPolicies: Policy[] = [
 ];
 
 export const AdminPolicyManagement = () => {
-  const [policies, setPolicies] = useState<Policy[]>(mockPolicies);
+  const [policies] = useState<Policy[]>(mockPolicies);
 
   return (
     <div className="space-y-8">

@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Upload, 
-  Camera, 
-  Video, 
   Trash2, 
   AlertTriangle, 
   CheckCircle2, 

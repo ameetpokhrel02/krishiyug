@@ -3,7 +3,7 @@ import {
   Shield, FileText, CheckCircle2, XCircle,
   AlertTriangle, TrendingUp, Search, Filter,
   ArrowUpRight, Clock, MapPin, Eye, Moon, Sun,
-  CloudRain, Activity, ScanSearch, ShieldCheck, AlertCircle
+  CloudRain, Activity, ScanSearch, ShieldCheck
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from '@/providers/theme-provider';

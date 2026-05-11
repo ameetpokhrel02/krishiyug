@@ -25,6 +25,29 @@
 - **Government**: Monitor agricultural insurance ecosystem
 - **Admins**: Dashboard for system-wide oversight
 
+### 📱 How to Use the Platform
+
+#### For Farmers
+1. Open the web app in a browser or use the mobile-friendly layout.
+2. Register with your name, phone number, district, and palika.
+3. Use the AI assistant to ask questions in Nepali or English.
+4. Tap the microphone icon for voice help and speak your claim details.
+5. Browse policies, buy coverage, and submit claims with photos or video.
+6. Track your claim status from the dashboard.
+
+#### For Web and Mobile Users
+1. Use the top navigation to switch between Home, Login, and role pages.
+2. On web, upload images/videos from your computer.
+3. On mobile, use the same buttons and voice command flow.
+4. The AI assistant can guide you step-by-step in simple Nepali.
+
+#### Quick Voice Commands
+- “माइक्रोफोन थिच्नुहोस्”
+- “मेरो दाबी कसरी पेश गर्ने?”
+- “बीमा हेर्न कहाँ जाने?”
+- “How do I upload a photo?”
+- “How do I check claim status?”
+
 ---
 
 ## 🛠️ Technology Stack
