@@ -1,8 +1,9 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&display=swap');
 
 @theme {
-  --font-sans: "Inter", "Geist", system-ui, sans-serif;
-  --font-heading: "Geist", "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", "Geist", "Mukta", system-ui, sans-serif;
+  --font-heading: "Geist", "Inter", "Mukta", system-ui, sans-serif;
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
