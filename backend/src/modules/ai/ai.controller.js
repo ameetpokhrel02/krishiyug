@@ -1,65 +1,36 @@
-import { AIService } from './ai.service.js';
+import { getAIResponse } from './ai.service.js';
 
-export class AIController {
-  /**
-   * Handle chat messages from farmers
-   */
-  static async chat(req, res) {
-    try {
-      const { message, history } = req.body;
-      
-      if (!message) {
-        return res.status(400).json({ error: 'Message is required' });
-      }
+export const handleChat = async (req, res) => {
+  try {
+    const { history = [], message } = req.body;
 
-      const reply = await AIService.chatWithFarmer(history || [], message);
-      
-      // Optionally extract claim data in background or when requested
-      const extractedData = await AIService.extractClaimData([...(history || []), { role: 'user', parts: [{ text: message }] }, { role: 'model', parts: [{ text: reply }] }]);
+    const normalizedHistory = Array.isArray(history) ? [...history] : [];
 
-      res.json({
-        reply,
-        extractedData
+    if (message) {
+      normalizedHistory.push({
+        role: 'user',
+        parts: [{ text: message }],
       });
-    } catch (error) {
-      console.error('AI Chat Error:', error);
-      res.status(500).json({ error: error.message });
     }
-  }
 
-  /**
-   * Analyze uploaded evidence
-   */
-  static async analyzeImage(req, res) {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: 'No image uploaded' });
-      }
-
-      const analysis = await AIService.analyzeEvidence(req.file.buffer, req.file.mimetype);
-      res.json({ analysis });
-    } catch (error) {
-      console.error('AI Image Error:', error);
-      res.status(500).json({ error: error.message });
+    if (normalizedHistory.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'History or message is required',
+      });
     }
-  }
 
-  /**
-   * Generate summary for ward/insurance
-   */
-  static async summarize(req, res) {
-    try {
-      const { claimData, role } = req.body;
-      
-      if (!claimData || !role) {
-        return res.status(400).json({ error: 'Claim data and role are required' });
-      }
+    const reply = await getAIResponse(normalizedHistory);
 
-      const summary = await AIService.generateSummary(claimData, role);
-      res.json({ summary });
-    } catch (error) {
-      console.error('AI Summary Error:', error);
-      res.status(500).json({ error: error.message });
-    }
+    return res.json({
+      success: true,
+      reply,
+    });
+  } catch (error) {
+    console.error('AI Chat Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to process AI request',
+    });
   }
-}
+};
