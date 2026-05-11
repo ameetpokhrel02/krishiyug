@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { connectDB } from './db/dbConnection.js';
+import aiRoutes from './modules/ai/ai.routes.js';
 
 // Import routes
 import authRoutes from './routes/auth.routes.js';
