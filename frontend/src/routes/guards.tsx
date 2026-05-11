@@ -1,11 +1,25 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { PATHS } from './paths';
 
-// This is a placeholder for actual auth logic
+// Get actual user from localStorage
 const useAuth = () => {
-  // Mocking auth for development - can be overridden by localStorage
-  const mockRole = localStorage.getItem('mockRole') || 'FARMER';
-  return { isAuthenticated: true, user: { role: mockRole } };
+  const token = localStorage.getItem('authToken');
+  const userStr = localStorage.getItem('user');
+  
+  let user = null;
+  if (userStr) {
+    try {
+      user = JSON.parse(userStr);
+    } catch (e) {
+      console.error('Failed to parse user from localStorage:', e);
+    }
+  }
+  
+  return { 
+    isAuthenticated: !!token && !!user, 
+    user,
+    token 
+  };
 };
 
 export const AuthGuard = () => {
@@ -20,9 +34,22 @@ export const AuthGuard = () => {
 };
 
 export const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
-  const { user } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
 
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!isAuthenticated) {
+    return <Navigate to={PATHS.AUTH.LOGIN} state={{ from: location }} replace />;
+  }
+
+  if (!user) {
+    return <Navigate to={PATHS.HOME} replace />;
+  }
+
+  // Normalize roles to uppercase for comparison
+  const userRole = (user.role || '').toUpperCase();
+  const normalizedAllowedRoles = allowedRoles.map(r => r.toUpperCase());
+
+  if (!normalizedAllowedRoles.includes(userRole)) {
     return <Navigate to={PATHS.HOME} replace />;
   }
 
