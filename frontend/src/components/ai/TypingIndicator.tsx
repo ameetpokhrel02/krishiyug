@@ -1,4 +1,3 @@
-import React from 'react';
 import { AIAvatar } from "./AIAvatar";
 
 export const TypingIndicator = () => {

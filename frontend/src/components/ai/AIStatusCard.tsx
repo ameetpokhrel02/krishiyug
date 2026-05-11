@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sparkles, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 

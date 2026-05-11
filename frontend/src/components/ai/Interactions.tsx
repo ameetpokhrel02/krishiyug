@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-export const VoiceInputButton = ({ onTranscript }: { onTranscript: (text: string) => void }) => {
+export const VoiceInputButton = ({ onTranscript: _onTranscript }: { onTranscript: (text: string) => void }) => {
   const [isListening, setIsListening] = useState(false);
 
   const toggleListening = () => {
