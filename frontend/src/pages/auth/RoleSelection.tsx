@@ -43,8 +43,11 @@ export const RoleSelection = () => {
     if (roleId === 'FARMER') {
       // Farmers can register or login
       navigate(PATHS.AUTH.LOGIN, { state: { selectedRole: roleId, isNewUser: true } });
+    } else if (roleId === 'ADMIN') {
+      // Admins use the dedicated admin login page and do not register
+      navigate(PATHS.AUTH.ADMIN_LOGIN, { state: { selectedRole: roleId } });
     } else {
-      // Insurers and Admins must be onboarded by KrishiYug
+      // Insurance partners are onboarded by KrishiYug
       navigate(PATHS.AUTH.LOGIN, { state: { selectedRole: roleId } });
     }
   };

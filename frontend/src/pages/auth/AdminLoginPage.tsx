@@ -54,6 +54,9 @@ export const AdminLoginPage = () => {
       className="w-full"
     >
       <h1 className="text-3xl font-heading font-bold text-indigo-950 mb-2 mt-8">Admin Login</h1>
+      <p className="text-sm text-slate-500 mb-6">
+        Use the admin account created by the KrishiYug team. Admins do not register from the public form.
+      </p>
       <form onSubmit={handleLogin} className="space-y-5 mt-6">
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700">Email or Phone Number</label>

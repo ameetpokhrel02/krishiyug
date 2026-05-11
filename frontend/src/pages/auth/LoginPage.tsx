@@ -9,6 +9,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const selectedRole = location.state?.selectedRole || 'FARMER';
+  const canRegister = selectedRole === 'FARMER';
 
   const roleLabels: Record<string, string> = {
     FARMER: 'Farmer',
@@ -71,10 +72,18 @@ export const LoginPage = () => {
         </form>
 
         <div className="mt-8 text-center space-y-6">
-          <p className="text-slate-500 text-sm">
-            New to Krishiyug? {' '}
-            <Link to={PATHS.AUTH.ROLE_SELECTION} className="text-emerald-600 font-bold hover:underline">Register Here</Link>
-          </p>
+          {canRegister ? (
+            <p className="text-slate-500 text-sm">
+              New to Krishiyug? {' '}
+              <Link to={PATHS.AUTH.ROLE_SELECTION} className="text-emerald-600 font-bold hover:underline">Register Here</Link>
+            </p>
+          ) : (
+            <p className="text-slate-500 text-sm">
+              {selectedRole === 'ADMIN'
+                ? 'Admins use the dedicated login page and are onboarded by the KrishiYug team.'
+                : 'This role is onboarded by the KrishiYug team and does not self-register.'}
+            </p>
+          )}
           <div className="flex items-center gap-4 py-2 opacity-30">
             <div className="h-px bg-slate-400 flex-1" />
             <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Digital Trust Network</span>
