@@ -5,6 +5,12 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { connectDB } from './db/dbConnection.js';
 
+// Import routes
+import authRoutes from './routes/auth.routes.js';
+import farmerRoutes from './routes/farmer.routes.js';
+import wardRoutes from './routes/ward.routes.js';
+import insuranceRoutes from './routes/insurance.routes.js';
+
 dotenv.config({
     path: './.env'
 });
@@ -39,6 +45,12 @@ app.get('/api/v1', (req, res) => {
     });
 });
 
+// Mount authentication and protected routes
+app.use('/api/auth', authRoutes);
+app.use('/api/farmer', farmerRoutes);
+app.use('/api/ward', wardRoutes);
+app.use('/api/insurance', insuranceRoutes);
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({
@@ -47,12 +59,18 @@ app.use((req, res) => {
     });
 });
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(err.status || 500).json({
+
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal server error';
+
+    res.status(statusCode).json({
         success: false,
-        message: err.message || 'Internal server error'
+        message: message,
+        errors: err.errors || [],
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
 });
 
