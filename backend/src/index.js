@@ -81,6 +81,7 @@ app.use('/api/policies', policyRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use((req, res) => {

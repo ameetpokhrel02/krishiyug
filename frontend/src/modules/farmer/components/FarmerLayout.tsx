@@ -9,15 +9,18 @@ import {
   Bell,
   Menu,
   CreditCard,
-  Leaf
+  Leaf,
+  Sparkles
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { LogoutDialog } from '@/components/shared/LogoutDialog';
+import { AIChatbot } from '@/components/chatbot/ai-chatbot';
 
 const navItems = [
   { icon: Home, label: 'Overview', path: '/farmer' },
   { icon: ShieldCheck, label: 'Buy Insurance', path: '/farmer/browse' },
+  { icon: Sparkles, label: 'AI Voice Assistant', path: '/farmer/voice-assistant' },
   { icon: FileText, label: 'Submit Claim', path: '/farmer/submit-claim' },
   { icon: History, label: 'My Policies', path: '/farmer/policies' },
   { icon: CreditCard, label: 'Transactions', path: '/farmer/transactions' },
@@ -131,6 +134,7 @@ export const FarmerLayout = () => {
         )}
       </AnimatePresence>
 
+      <AIChatbot />
       <LogoutDialog open={showLogout} onClose={() => setShowLogout(false)} theme="emerald" />
     </div>
   );

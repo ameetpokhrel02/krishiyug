@@ -89,7 +89,7 @@ export const claimAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 
-  getMyClaims: () => api.get('/claims/user/my-claims'),
+  getMyClaims: () => api.get('/claims/my-claims'),
 
   getClaimStatus: (claimId: string) =>
     api.get(`/claims/${claimId}/status`),

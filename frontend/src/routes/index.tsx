@@ -32,6 +32,7 @@ import { FarmerLayout } from '@/modules/farmer/components/FarmerLayout';
 import { FarmerOverview } from '@/modules/farmer/pages/Overview';
 import { FarmerBrowsePolicies } from '@/modules/farmer/pages/BrowsePolicies';
 import { FarmerSubmitClaim } from '@/modules/farmer/pages/SubmitClaim';
+import { FarmerVoiceAssistant } from '@/modules/farmer/pages/VoiceAssistant';
 
 // Insurance Officer Imports
 import { InsuranceOfficerLayout } from '@/modules/insurance/components/InsuranceOfficerLayout';
@@ -106,6 +107,7 @@ const router = createBrowserRouter([
           { index: true, element: <FarmerOverview /> },
           { path: 'browse', element: <FarmerBrowsePolicies /> },
           { path: 'submit-claim', element: <FarmerSubmitClaim /> },
+          { path: 'voice-assistant', element: <FarmerVoiceAssistant /> },
           { path: 'policies', element: <div className="p-8"><h1 className="text-2xl font-bold text-slate-900">My Policies</h1><p className="mt-2 text-slate-500">History coming soon.</p></div> },
         ],
       },
