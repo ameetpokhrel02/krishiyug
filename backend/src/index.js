@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { connectDB } from './db/dbConnection.js';
+import aiRoutes from './modules/ai/ai.routes.js';
 
 // Import routes
 import authRoutes from './routes/auth.routes.js';
@@ -50,6 +51,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/farmer', farmerRoutes);
 app.use('/api/ward', wardRoutes);
 app.use('/api/insurance', insuranceRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler
 app.use((req, res) => {

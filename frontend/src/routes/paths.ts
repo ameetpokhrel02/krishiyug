@@ -9,12 +9,31 @@ export const PATHS = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
   },
+  ADMIN: {
+    ROOT: '/admin',
+    OVERVIEW: '/admin',
+    FARMERS: '/admin/farmers',
+    WARDS: {
+      MUNICIPALITIES: '/admin/wards/municipalities',
+      OFFICERS: '/admin/wards/officers',
+    },
+    INSURANCE: {
+      COMPANIES: '/admin/insurance/companies',
+      OFFICERS: '/admin/insurance/officers',
+    },
+    CLAIMS: '/admin/claims',
+    FRAUD: '/admin/fraud',
+    ANALYTICS: '/admin/analytics',
+    NOTIFICATIONS: '/admin/notifications',
+    AUDIT_LOGS: '/admin/audit-logs',
+    SETTINGS: '/admin/settings',
+    PROFILE: '/admin/profile',
+  },
   DASHBOARD: {
     FARMER: '/dashboard/farmer',
 
     WARD: '/dashboard/ward',
     INSURANCE: '/dashboard/insurance',
-    ADMIN: '/dashboard/admin',
   },
   CLAIMS: {
     LIST: '/claims',

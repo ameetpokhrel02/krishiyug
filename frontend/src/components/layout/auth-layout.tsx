@@ -84,9 +84,8 @@ export const AuthLayout = () => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">Claim Verified</p>
-                  <p className="text-xs text-emerald-300">Palika Approved</p>
+                  <p className="text-xs text-emerald-300">Ward & Palika Approved</p>
                 </div>
->>>>>>> 007160a (basic frontend setup)
               </div>
               <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
                 <div className="w-full h-full bg-emerald-400 rounded-full" />
