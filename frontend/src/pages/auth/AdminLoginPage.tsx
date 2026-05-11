@@ -7,7 +7,7 @@ import { authAPI } from '@/services/api';
 import { toast } from 'sonner';
 
 export const AdminLoginPage = () => {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -17,14 +17,14 @@ export const AdminLoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    if (!identifier || !password) {
       toast.error('Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
     try {
-      const response: any = await authAPI.adminLogin({ email, password });
+      const response: any = await authAPI.adminLogin({ identifier, password });
       
       if (response?.success || response?.data?.token) {
         const token = response?.data?.token || response?.token;
@@ -56,18 +56,18 @@ export const AdminLoginPage = () => {
       <h1 className="text-3xl font-heading font-bold text-indigo-950 mb-2 mt-8">Admin Login</h1>
       <form onSubmit={handleLogin} className="space-y-5 mt-6">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Email</label>
+          <label className="text-sm font-medium text-slate-700">Email or Phone Number</label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Mail className="h-5 w-5 text-slate-400" />
             </div>
             <input
-              type="email"
+              type="text"
               required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={identifier}
+              onChange={e => setIdentifier(e.target.value)}
               className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
-              placeholder="Enter your email"
+              placeholder="Enter your email or phone number"
               disabled={isLoading}
             />
           </div>

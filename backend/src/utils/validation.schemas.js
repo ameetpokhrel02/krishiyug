@@ -56,6 +56,15 @@ export const loginSchema = z.object({
     .min(1, "Password is required"),
 });
 
+export const adminLoginSchema = z.object({
+  identifier: z
+    .string()
+    .min(1, "Email or phone number is required"),
+  password: z
+    .string()
+    .min(1, "Password is required"),
+});
+
 export const claimSubmissionSchema = z.object({
   policyId: z.string().min(1, "Policy ID is required"),
   tagNumber: z.string().optional(),

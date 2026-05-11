@@ -5,6 +5,48 @@ import Claim from "../models/claim.model.js";
 import Policy from "../models/policy.model.js";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
+import { adminLoginSchema } from "../utils/validation.schemas.js";
+
+// Admin login using email and password
+export const adminLogin = asyncHandler(async (req, res) => {
+  const validationResult = adminLoginSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    const errors = validationResult.error.errors.map((err) => ({
+      field: err.path.join("."),
+      message: err.message,
+    }));
+    throw new ApiError(400, "Validation failed", errors);
+  }
+
+  const { identifier, password } = validationResult.data;
+  const normalizedIdentifier = String(identifier).trim().toLowerCase();
+
+  const admin = await User.findOne({
+    role: "admin",
+    $or: [
+      { email: normalizedIdentifier },
+      { phoneNumber: normalizedIdentifier },
+    ],
+  }).select("+password");
+
+  if (!admin) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  const isPasswordValid = await admin.comparePassword(password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  const token = admin.generateAuthToken();
+  const adminResponse = admin.toJSON();
+
+  res.status(200).json(
+    new ApiResponse(200, { user: adminResponse, token }, "Admin login successful")
+  );
+});
 
 // Admin views all pending claims
 export const getPendingClaims = asyncHandler(async (req, res) => {

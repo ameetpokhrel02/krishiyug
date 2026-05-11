@@ -47,7 +47,7 @@ export const authAPI = {
   login: (data: { phoneNumber?: string; email?: string; password: string }) =>
     api.post('/auth/login', data),
 
-  adminLogin: (data: { email: string; password: string }) =>
+  adminLogin: (data: { identifier: string; password: string }) =>
     api.post('/admin/login', data),
 
   getCurrentUser: () => api.get('/auth/me'),
