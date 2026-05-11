@@ -205,6 +205,104 @@ export default function LandingPage() {
          </div>
       </section>
 
+      {/* How Our System Works Section */}
+      <section className="py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="text-center mb-20">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-600 mb-4">STREAMLINED PROCESS</p>
+              <h2 className="text-7xl font-black tracking-tighter text-slate-900 mb-6">
+                How Our System Works
+              </h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto font-medium">
+                A simple, transparent, and farmer-centric approach to agricultural insurance
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { num: '01', titleEn: 'Register & Onboard', titleNe: 'दर्ता गर्नुहोस्', desc: 'Create an account and verify your farming details', color: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-200' },
+              { num: '02', titleEn: 'Browse Policies', titleNe: 'नीति ब्राउझ गर्नुहोस्', desc: 'Explore coverage options suited to your farm', color: 'from-cyan-500 to-cyan-600', shadow: 'shadow-cyan-200' },
+              { num: '03', titleEn: 'Purchase Coverage', titleNe: 'कभरेज किनुहोस्', desc: 'Select and buy insurance with minimal paperwork', color: 'from-purple-500 to-purple-600', shadow: 'shadow-purple-200' },
+              { num: '04', titleEn: 'File Claim', titleNe: 'दावी फाइल गर्नुहोस्', desc: 'Report crop loss via app, voice, or SMS', color: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-200' },
+            ].map((step, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.15 }}
+                viewport={{ once: true }}
+              >
+                <div className={`h-full bg-gradient-to-br ${step.color} rounded-3xl p-8 text-white shadow-2xl ${step.shadow}/30 hover:shadow-2xl hover:${step.shadow}/50 transition-all duration-300 transform hover:scale-105`}>
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <div className="text-7xl font-black text-white/20 mb-2">{step.num}</div>
+                      <h3 className="text-2xl font-black mb-1">{step.titleEn}</h3>
+                      <p className="text-sm font-bold text-white/80">{step.titleNe}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-white/90 leading-relaxed font-medium">{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Krishiyug Section */}
+      <section className="py-32 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-8 relative z-10">
+          <div className="text-center mb-20">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-emerald-400 mb-4">PREMIUM FEATURES</p>
+              <h2 className="text-7xl font-black tracking-tighter mb-6">
+                Why Choose Krishiyug
+              </h2>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { num: '01', icon: '🛰️', titleEn: 'Satellite-Secured', titleNe: 'उपग्रह सुरक्षित', desc: 'AI-powered satellite verification for crop damage claims', color: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-500/50' },
+              { num: '02', icon: '📱', titleEn: 'Multi-Channel Access', titleNe: 'बहु-चैनल पहुँच', desc: 'File claims via smartphone, voice, or SMS', color: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/50' },
+              { num: '03', icon: '⚡', titleEn: 'Instant Payouts', titleNe: 'तत्काल भुक्तानी', desc: 'Quick claim settlement within days, not months', color: 'from-orange-500/20 to-yellow-500/20', border: 'border-orange-500/50' },
+              { num: '04', icon: '🤖', titleEn: 'AI Assistant', titleNe: 'कृत्रिम बुद्धिमत्ता', desc: 'Chatbot guidance in Nepali and English', color: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-500/50' },
+              { num: '05', icon: '📊', titleEn: 'Real-Time Dashboard', titleNe: 'रियल-टाइम डैशबोर्ड', desc: 'Track policies, claims, and payouts in real-time', color: 'from-indigo-500/20 to-blue-500/20', border: 'border-indigo-500/50' },
+              { num: '06', icon: '💚', titleEn: 'Farmer-First Design', titleNe: 'किसान-केन्द्रित डिजाइन', desc: 'Built specifically for agricultural communities', color: 'from-green-500/20 to-emerald-500/20', border: 'border-green-500/50' },
+            ].map((feature, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.85 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <div className={`h-full backdrop-blur-xl bg-gradient-to-br ${feature.color} border ${feature.border} rounded-3xl p-8 hover:border-white/80 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 transition-all duration-300 group overflow-hidden relative`}>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/0 transition-all duration-300" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-300" />
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-5xl">{feature.icon}</div>
+                      <span className="text-xs font-black text-emerald-400 uppercase tracking-widest px-2 py-1 bg-emerald-500/20 rounded-full">{feature.num}</span>
+                    </div>
+                    <h3 className="text-xl font-black mb-1 group-hover:text-emerald-300 transition-colors">{feature.titleEn}</h3>
+                    <p className="text-xs font-bold text-emerald-400 mb-3">{feature.titleNe}</p>
+                    <p className="text-sm text-white/80 leading-relaxed font-medium">{feature.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Footer Branding */}
       <footer className="pt-32 pb-12 px-8 bg-white border-t border-slate-100">
          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
