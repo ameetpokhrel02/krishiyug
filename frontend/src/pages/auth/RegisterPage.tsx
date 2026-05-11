@@ -100,9 +100,12 @@ export const RegisterPage = () => {
         }
       });
 
-      if (response.success) {
-        localStorage.setItem('authToken', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response?.success || response?.data?.token) {
+        const token = response?.data?.token || response?.token;
+        const user = response?.data?.user || response?.user;
+        
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
         toast.success('Registration successful!');
         navigate(PATHS.FARMER.OVERVIEW);
       }

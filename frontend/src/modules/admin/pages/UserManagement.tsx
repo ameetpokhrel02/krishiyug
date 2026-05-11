@@ -20,11 +20,11 @@ export const AdminUserManagement = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await adminAPI.getUsers(activeRole);
-      if (response.success) {
-        setUsers(response.data || []);
+      const response: any = await adminAPI.getUsers(activeRole);
+      if (response?.success || response?.data) {
+        setUsers(response?.data || []);
       } else {
-        toast.error(response.message || 'Failed to fetch users');
+        toast.error(response?.message || 'Failed to fetch users');
       }
     } catch (err: any) {
       console.error('Error fetching users:', err);

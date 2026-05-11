@@ -24,16 +24,19 @@ export const AdminLoginPage = () => {
 
     setIsLoading(true);
     try {
-      const response = await authAPI.adminLogin({ email, password });
+      const response: any = await authAPI.adminLogin({ email, password });
       
-      if (response.success) {
-        localStorage.setItem('authToken', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (response?.success || response?.data?.token) {
+        const token = response?.data?.token || response?.token;
+        const user = response?.data?.user || response?.user;
+        
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
         
         toast.success('Login successful!');
         navigate(PATHS.ADMIN.ROOT);
       } else {
-        toast.error(response.message || 'Login failed');
+        toast.error(response?.message || 'Login failed');
       }
     } catch (err: any) {
       const errorMessage = err?.message || 'Login failed. Please try again.';
