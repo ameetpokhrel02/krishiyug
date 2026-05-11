@@ -1,21 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminDataTable } from '../components/DataTable';
 import { cn } from '@/lib/utils';
 import type { User, UserRole } from '@/types/platform';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const mockUsers: User[] = [
-  { id: '1', name: 'Ram Bahadur', phone: '9841234567', email: 'ram@example.com', role: 'FARMER', status: 'ACTIVE', createdAt: '2024-03-10' },
-  { id: '2', name: 'Suman Shrestha', phone: '9841001122', email: 'suman@biratnagar.gov.np', role: 'PALIKA_OFFICER', status: 'ACTIVE', createdAt: '2023-10-01', organizationId: 'M3' },
-  { id: '3', name: 'Binod Sharma', phone: '9842001122', email: 'binod@shikhar.com', role: 'INSURANCE_OFFICER', status: 'ACTIVE', createdAt: '2023-12-01', organizationId: 'INS1' },
-];
+import { adminAPI } from '@/services/api';
+import { toast } from 'sonner';
 
 export const AdminUserManagement = () => {
   const [activeRole, setActiveRole] = useState<UserRole>('FARMER');
   const [showModal, setShowModal] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredUsers = mockUsers.filter(u => u.role === activeRole);
+  useEffect(() => {
+    fetchUsers();
+  }, [activeRole]);
+
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await adminAPI.getUsers(activeRole);
+      if (response.success) {
+        setUsers(response.data || []);
+      } else {
+        toast.error(response.message || 'Failed to fetch users');
+      }
+    } catch (err: any) {
+      console.error('Error fetching users:', err);
+      toast.error('Failed to fetch users');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredUsers = users.filter(u => u.role === activeRole);
 
   const columns = [
     { 
@@ -35,8 +54,8 @@ export const AdminUserManagement = () => {
       accessorKey: 'phone',
       cell: (u: User) => (
         <div>
-          <p className="text-sm text-slate-900">{u.phone}</p>
-          <p className="text-[10px] text-slate-400 font-bold">{u.email}</p>
+          <p className="text-sm text-slate-900">{u.phone || 'N/A'}</p>
+          <p className="text-[10px] text-slate-400 font-bold">{u.email || 'N/A'}</p>
         </div>
       )
     },
@@ -55,7 +74,7 @@ export const AdminUserManagement = () => {
     { 
       header: 'Joined', 
       accessorKey: 'createdAt',
-      cell: (u: User) => <span className="text-sm text-slate-500">{u.createdAt}</span> 
+      cell: (u: User) => <span className="text-sm text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</span> 
     },
   ];
 
@@ -92,11 +111,17 @@ export const AdminUserManagement = () => {
         ))}
       </div>
 
-      <AdminDataTable 
-        title={`${activeRole.replace('_', ' ')}s Registry`}
-        columns={columns}
-        data={filteredUsers}
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center h-40">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        </div>
+      ) : (
+        <AdminDataTable 
+          title={`${activeRole.replace('_', ' ')}s Registry`}
+          columns={columns}
+          data={filteredUsers}
+        />
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

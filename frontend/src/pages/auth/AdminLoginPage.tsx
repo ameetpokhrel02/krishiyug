@@ -1,28 +1,45 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { PATHS } from '@/routes/paths';
+import { authAPI } from '@/services/api';
+import { toast } from 'sonner';
 
 export const AdminLoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/admin/login`, { email, password });
-      // Save token, etc. as needed
-      // Redirect to admin dashboard
-      navigate(PATHS.DASHBOARD.ADMIN);
+      const response = await authAPI.adminLogin({ email, password });
+      
+      if (response.success) {
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        toast.success('Login successful!');
+        navigate(PATHS.ADMIN.ROOT);
+      } else {
+        toast.error(response.message || 'Login failed');
+      }
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Login failed');
+      const errorMessage = err?.message || 'Login failed. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +65,7 @@ export const AdminLoginPage = () => {
               onChange={e => setEmail(e.target.value)}
               className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
               placeholder="Enter your email"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -64,11 +82,13 @@ export const AdminLoginPage = () => {
               onChange={e => setPassword(e.target.value)}
               className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
               placeholder="Enter your password"
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+              disabled={isLoading}
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -81,16 +101,18 @@ export const AdminLoginPage = () => {
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
               className="form-checkbox rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+              disabled={isLoading}
             />
             Remember Me
           </label>
         </div>
-        {error && <div className="text-red-500 text-sm">{error}</div>}
         <button
           type="submit"
-          className="w-full py-3 px-4 bg-indigo-900 text-white rounded-xl font-medium hover:bg-indigo-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 transition-all shadow-md mt-6"
+          disabled={isLoading}
+          className="w-full py-3 px-4 bg-indigo-900 text-white rounded-xl font-medium hover:bg-indigo-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 transition-all shadow-md mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          Sign In
+          {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+          {isLoading ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
     </motion.div>

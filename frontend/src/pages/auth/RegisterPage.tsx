@@ -1,20 +1,30 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, Phone, MapPin, ArrowRight, ShieldCheck, ChevronLeft, Locate, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PATHS } from '@/routes/paths';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+import { locationAPI, authAPI } from '@/services/api';
+import { toast } from 'sonner';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
+  const locationState = useLocation().state;
   const [isDetecting, setIsDetecting] = useState(false);
-  const [location, setLocation] = useState({ district: '', palika: '' });
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    phoneNumber: '',
+    password: '',
+    district: '',
+    palika: '',
+    wardNumber: '',
+  });
+
+  const [location, setLocation] = useState({ district: '', palika: '', ward: '' });
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      toast.error("Geolocation is not supported by your browser");
       return;
     }
 
@@ -23,30 +33,85 @@ export const RegisterPage = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const response = await axios.post(`${API_URL}/location/reverse-geocode`, {
-            lat: latitude,
-            lng: longitude
-          });
+          const response = await locationAPI.reverseGeocode(latitude, longitude);
 
-          if (response.data.success) {
+          if (response.success) {
             setLocation({
-              district: response.data.data.district || '',
-              palika: response.data.data.palika || ''
+              district: response.data.district || '',
+              palika: response.data.palika || '',
+              ward: response.data.ward || ''
             });
+            setFormData(prev => ({
+              ...prev,
+              district: response.data.district || '',
+              palika: response.data.palika || '',
+              wardNumber: response.data.ward || ''
+            }));
+            toast.success('Location detected successfully!');
+          } else {
+            toast.error(response.message || 'Failed to detect location');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error("Location Detection Error:", error);
-          alert("Failed to detect location. Please enter manually.");
+          toast.error("Failed to detect location. Please enter manually.");
         } finally {
           setIsDetecting(false);
         }
       },
       (error) => {
         console.error("Geolocation Error:", error);
-        alert("Permission denied or location unavailable.");
+        toast.error("Permission denied or location unavailable.");
         setIsDetecting(false);
       }
     );
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.phoneNumber || !formData.password || !formData.district || !formData.palika) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.phoneNumber.length !== 10 || !/^[6-9]/.test(formData.phoneNumber)) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await authAPI.register({
+        name: formData.name,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: 'farmer',
+        farmerDetails: {
+          location: {
+            district: formData.district,
+            palika: formData.palika,
+            ward: formData.wardNumber || ''
+          }
+        }
+      });
+
+      if (response.success) {
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        toast.success('Registration successful!');
+        navigate(PATHS.FARMER.OVERVIEW);
+      }
+    } catch (err: any) {
+      const errorMessage = err?.message || 'Registration failed. Try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,7 +127,7 @@ export const RegisterPage = () => {
           <p className="text-slate-500 text-sm">Join the ecosystem to protect your agricultural assets.</p>
         </div>
 
-        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate(PATHS.AUTH.OTP_VERIFICATION); }}>
+        <form className="space-y-4" onSubmit={handleRegister}>
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-slate-700">Full Name</label>
             <div className="relative">
@@ -70,7 +135,10 @@ export const RegisterPage = () => {
               <input 
                 type="text" 
                 placeholder="Ram Bahadur" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                disabled={isLoading}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm disabled:opacity-50"
               />
             </div>
           </div>
@@ -80,11 +148,27 @@ export const RegisterPage = () => {
             <div className="relative">
               <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
-                type="tel" 
+                type="tel"
+                maxLength={10} 
                 placeholder="98XXXXXXXX" 
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData({...formData, phoneNumber: e.target.value.replace(/\D/g, '')})}
+                disabled={isLoading}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm disabled:opacity-50"
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">Password</label>
+            <input 
+              type="password" 
+              placeholder="Min 8 characters" 
+              value={formData.password}
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              disabled={isLoading}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm disabled:opacity-50"
+            />
           </div>
 
           <div className="space-y-3">
@@ -93,7 +177,7 @@ export const RegisterPage = () => {
                 <button 
                   type="button"
                   onClick={handleDetectLocation}
-                  disabled={isDetecting}
+                  disabled={isDetecting || isLoading}
                   className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
                 >
                   {isDetecting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Locate className="w-3 h-3" />}
@@ -105,18 +189,20 @@ export const RegisterPage = () => {
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input 
                     type="text" 
-                    value={location.district}
-                    onChange={(e) => setLocation({...location, district: e.target.value})}
+                    value={formData.district}
+                    onChange={(e) => setFormData({...formData, district: e.target.value})}
                     placeholder="District" 
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all"
+                    disabled={isLoading}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all disabled:opacity-50"
                   />
                 </div>
                 <input 
                   type="text" 
-                  value={location.palika}
-                  onChange={(e) => setLocation({...location, palika: e.target.value})}
+                  value={formData.palika}
+                  onChange={(e) => setFormData({...formData, palika: e.target.value})}
                   placeholder="Palika" 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all disabled:opacity-50"
                 />
              </div>
           </div>
@@ -128,9 +214,14 @@ export const RegisterPage = () => {
              </p>
           </div>
 
-          <Button type="submit" className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xl shadow-emerald-200 transition-all active:scale-[0.98] mt-4">
-            Verify & Create Account
-            <ArrowRight className="w-4 h-4 ml-2" />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xl shadow-emerald-200 transition-all active:scale-[0.98] mt-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isLoading ? 'Creating Account...' : 'Verify & Create Account'}
+            {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
           </Button>
         </form>
 
