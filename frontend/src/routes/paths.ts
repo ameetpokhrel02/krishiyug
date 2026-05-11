@@ -35,6 +35,7 @@ export const PATHS = {
     SUBMIT_CLAIM: '/farmer/submit-claim',
     POLICIES: '/farmer/policies',
     TRANSACTIONS: '/farmer/transactions',
+    VOICE_ASSISTANT: '/farmer/voice-assistant',
     SETTINGS: '/farmer/settings',
   },
   INSURANCE: {

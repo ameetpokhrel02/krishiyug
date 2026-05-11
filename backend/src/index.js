@@ -1,5 +1,7 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config({ path: './.env' });
+
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -11,14 +13,9 @@ import authRoutes from './routes/auth.routes.js';
 import farmerRoutes from './routes/farmer.routes.js';
 import insuranceRoutes from './routes/insurance.routes.js';
 import policyRoutes from './routes/policy.routes.js';
-
 import claimRoutes from './routes/claim.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
-
-dotenv.config({
-    path: './.env'
-});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
