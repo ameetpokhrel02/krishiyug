@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { LogoutDialog } from '@/components/shared/LogoutDialog';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', path: '/insurance' },
@@ -23,7 +24,10 @@ const navItems = [
 
 export const InsuranceOfficerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const location = useLocation();
+  const user = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+  const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'IC';
 
   return (
     <div className="min-h-screen bg-[#f8faf8] flex overflow-hidden">
@@ -68,9 +72,12 @@ export const InsuranceOfficerLayout = () => {
           <div className="pt-8 border-t border-white/5 space-y-6">
             <div className="bg-white/5 p-5 rounded-3xl border border-white/5">
               <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Company Account</p>
-              <p className="text-sm font-bold text-white truncate">Shikhar Insurance Co.</p>
+              <p className="text-sm font-bold text-white truncate">{user?.companyName || user?.name || 'Insurance Co.'}</p>
             </div>
-            <button className="flex items-center gap-4 px-5 py-4 text-emerald-100/40 hover:text-white transition-colors w-full group">
+            <button
+              onClick={() => setShowLogout(true)}
+              className="flex items-center gap-4 px-5 py-4 text-emerald-100/40 hover:text-red-400 transition-colors w-full group"
+            >
               <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
               <span className="text-sm font-bold">Sign Out</span>
             </button>
@@ -105,11 +112,11 @@ export const InsuranceOfficerLayout = () => {
             </button>
             <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-slate-900">Binod Sharma</p>
-                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Claims Auditor</p>
+                <p className="text-sm font-black text-slate-900">{user?.name || 'Insurance Officer'}</p>
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Insurance Partner</p>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner">
-                BS
+                {initials}
               </div>
             </div>
           </div>
@@ -131,6 +138,8 @@ export const InsuranceOfficerLayout = () => {
           />
         )}
       </AnimatePresence>
+
+      <LogoutDialog open={showLogout} onClose={() => setShowLogout(false)} theme="emerald" />
     </div>
   );
 };

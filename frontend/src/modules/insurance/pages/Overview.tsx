@@ -1,109 +1,198 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  ShieldCheck, 
-  TrendingUp, 
-  AlertCircle,
-  CheckCircle2,
-  Clock
+import {
+  FileText,
+  TrendingUp,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Building2,
+  Loader2,
+  ArrowUpRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { insuranceAPI } from '@/services/api';
+import { toast } from 'sonner';
 
 export const InsuranceOverview = () => {
-  const stats = [
-    { label: 'Active Policies', value: '4,281', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { label: 'Pending Claims', value: '124', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { label: 'Verified Today', value: '18', icon: CheckCircle2, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Fraud Risk', value: 'Low', icon: AlertCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
+  const [stats, setStats] = useState<any>(null);
+  const [recentClaims, setRecentClaims] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [dashRes, claimsRes] = await Promise.all([
+          insuranceAPI.getDashboard(),
+          insuranceAPI.getAllClaims(),
+        ]);
+        // ApiResponse: response.data.data
+        setStats((dashRes as any).data?.data);
+        setRecentClaims(((claimsRes as any).data?.data || []).slice(0, 5));
+      } catch (err: any) {
+        toast.error('Could not load dashboard data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const metricCards = [
+    {
+      label: 'Total Claims',
+      value: stats?.claims?.total ?? 0,
+      icon: FileText,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+    },
+    {
+      label: 'Pending Review',
+      value: stats?.claims?.pendingReview ?? 0,
+      icon: Clock,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+    },
+    {
+      label: 'Approved',
+      value: stats?.claims?.approved ?? 0,
+      icon: CheckCircle,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+    },
+    {
+      label: 'Rejected',
+      value: stats?.claims?.rejected ?? 0,
+      icon: XCircle,
+      color: 'text-red-600',
+      bg: 'bg-red-50',
+    },
+    {
+      label: 'Active Policies',
+      value: stats?.activePolicies ?? 0,
+      icon: TrendingUp,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+    },
   ];
 
   return (
-    <div className="space-y-10">
-      <div className="flex justify-between items-center">
-         <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tighter">Market Overview</h1>
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Shikhar Insurance Co. | Real-time Data</p>
-         </div>
-         <div className="flex gap-4">
-            <div className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-3">
-               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network Secure</span>
-            </div>
-         </div>
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div className="bg-emerald-950 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-500/20 rounded-full blur-[80px]" />
+        <div className="relative z-10 flex items-center gap-6">
+          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center">
+            <Building2 className="w-8 h-8 text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Insurance Partner Dashboard</p>
+            <h1 className="text-4xl font-black tracking-tighter text-white">
+              {stats?.companyName || 'Insurance Company'}
+            </h1>
+            <p className="text-emerald-100/60 font-medium mt-1">
+              You have <span className="text-emerald-400 font-black">{stats?.claims?.pendingReview ?? 0}</span> claim{stats?.claims?.pendingReview !== 1 ? 's' : ''} awaiting your review.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {metricCards.map((card, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="p-8 bg-white border border-slate-100 rounded-[32px] shadow-sm hover:shadow-xl transition-all"
+            transition={{ delay: i * 0.08 }}
+            className="p-8 bg-white border border-slate-100 rounded-[32px] shadow-sm hover:shadow-xl transition-all group"
           >
-            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", stat.bg, stat.color)}>
-              <stat.icon className="w-6 h-6" />
+            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform", card.bg, card.color)}>
+              <card.icon className="w-6 h-6" />
             </div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
-            <p className="text-2xl font-black text-slate-900">{stat.value}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{card.label}</p>
+            <p className="text-3xl font-black text-slate-900">{card.value}</p>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-emerald-950 rounded-[40px] p-10 text-white relative overflow-hidden shadow-2xl">
-           <div className="absolute top-0 right-0 -mr-40 -mt-40 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[100px]" />
-           <div className="relative z-10">
-              <div className="flex justify-between items-start mb-12">
-                 <div>
-                    <h3 className="text-2xl font-black tracking-tighter">Claim Velocity</h3>
-                    <p className="text-emerald-100/40 text-[10px] font-bold uppercase tracking-widest mt-1">Last 30 Days Activity</p>
-                 </div>
-                 <TrendingUp className="w-8 h-8 text-emerald-400" />
-              </div>
-              <div className="h-48 flex items-end gap-2 px-4">
-                 {[40, 70, 45, 90, 65, 80, 55, 95, 75, 85].map((h, i) => (
-                   <motion.div 
-                     key={i}
-                     initial={{ height: 0 }}
-                     animate={{ height: `${h}%` }}
-                     className="flex-1 bg-emerald-500/20 rounded-t-lg relative group"
-                   >
-                      <div className="absolute inset-0 bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-t-lg" />
-                   </motion.div>
-                 ))}
-              </div>
-              <div className="flex justify-between mt-6 px-4 text-[8px] font-black text-emerald-100/20 uppercase tracking-widest">
-                 <span>May 01</span>
-                 <span>May 15</span>
-                 <span>Today</span>
-              </div>
-           </div>
+      {/* Recent Claims Table */}
+      <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-slate-100 flex justify-between items-center">
+          <h3 className="text-xl font-black text-slate-900 tracking-tighter">Recent Claims</h3>
+          <a href="/insurance/claims" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline flex items-center gap-1">
+            View All <ArrowUpRight className="w-3 h-3" />
+          </a>
         </div>
-
-        <div className="space-y-8">
-           <h3 className="text-2xl font-black tracking-tighter text-slate-900">High Risk Alerts</h3>
-           <div className="space-y-4">
-              {[
-                { id: 'CLM-902', farmer: 'Ram Bahadur', risk: 'Satellite Mismatch', level: 'High' },
-                { id: 'CLM-885', farmer: 'Sita Devi', risk: 'Duplicate Photo', level: 'Med' }
-              ].map((alert, i) => (
-                <div key={i} className="p-6 bg-white border border-slate-100 rounded-[32px] shadow-sm hover:shadow-md transition-all group cursor-pointer">
-                   <div className="flex items-center gap-4 mb-4">
-                      <div className="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
-                         <AlertCircle className="w-5 h-5" />
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Farmer</th>
+                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">District</th>
+                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Policy Type</th>
+                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Coverage</th>
+                <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {recentClaims.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-8 py-12 text-center text-slate-400 text-sm">
+                    No claims found for your policies.
+                  </td>
+                </tr>
+              ) : (
+                recentClaims.map((claim: any) => (
+                  <tr key={claim._id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center font-black text-emerald-700 text-xs">
+                          {claim.farmerId?.name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">{claim.farmerId?.name || '—'}</p>
+                          <p className="text-[10px] text-slate-400">{claim.farmerId?.phoneNumber}</p>
+                        </div>
                       </div>
-                      <div>
-                         <p className="text-sm font-bold text-slate-900">{alert.id}</p>
-                         <p className="text-[10px] text-slate-400 font-bold uppercase">{alert.farmer}</p>
-                      </div>
-                   </div>
-                   <p className="text-xs font-medium text-slate-500 mb-4">{alert.risk}</p>
-                   <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={cn("h-full rounded-full", alert.level === 'High' ? 'bg-rose-500 w-full' : 'bg-amber-500 w-2/3')} />
-                   </div>
-                </div>
-              ))}
-           </div>
+                    </td>
+                    <td className="px-8 py-5 text-sm text-slate-600">
+                      {claim.farmerId?.farmerDetails?.location?.district || '—'}
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className="px-2 py-1 bg-slate-100 text-slate-700 text-[10px] font-black rounded-full uppercase tracking-widest capitalize">
+                        {claim.policyId?.policyType || '—'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5 text-sm font-black text-slate-900">
+                      Rs. {claim.policyId?.coverageAmount?.toLocaleString() || '—'}
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className={cn(
+                        "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest",
+                        claim.status === 'refund_approved' ? "bg-emerald-100 text-emerald-700" :
+                        claim.status === 'admin_verified' ? "bg-blue-100 text-blue-700" :
+                        claim.status === 'rejected' ? "bg-red-100 text-red-700" :
+                        "bg-amber-100 text-amber-700"
+                      )}>
+                        {claim.status === 'admin_verified' ? 'Needs Decision' :
+                         claim.status === 'refund_approved' ? 'Approved' :
+                         claim.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

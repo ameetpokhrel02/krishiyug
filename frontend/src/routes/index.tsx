@@ -1,6 +1,6 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { PATHS } from './paths';
-import { RoleGuard } from './guards';
+import { RoleGuard, AuthGuard, PublicGuard, AdminLoginGuard } from './guards';
 
 import LandingPage from '@/pages/LandingPage';
 
@@ -37,6 +37,8 @@ import { FarmerSubmitClaim } from '@/modules/farmer/pages/SubmitClaim';
 import { InsuranceOfficerLayout } from '@/modules/insurance/components/InsuranceOfficerLayout';
 import { InsuranceOverview } from '@/modules/insurance/pages/Overview';
 import { InsuranceClaimsRegistry } from '@/modules/insurance/pages/ClaimsRegistry';
+import { InsuredFarmers } from '@/modules/insurance/pages/InsuredFarmers';
+import { ActivePolicies } from '@/modules/insurance/pages/ActivePolicies';
 
 const router = createBrowserRouter([
   {
@@ -44,70 +46,96 @@ const router = createBrowserRouter([
     element: <LandingPage />,
   },
   {
-    element: <AuthLayout />,
+    element: <PublicGuard />,
     children: [
-      { path: PATHS.AUTH.WELCOME, element: <WelcomeScreen /> },
-      { path: PATHS.AUTH.LOGIN, element: <LoginPage /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: PATHS.AUTH.WELCOME, element: <WelcomeScreen /> },
+          { path: PATHS.AUTH.LOGIN, element: <LoginPage /> },
+          { path: PATHS.AUTH.ROLE_SELECTION, element: <RoleSelection /> },
+          { path: PATHS.AUTH.REGISTER, element: <RegisterPage /> },
+          { path: PATHS.AUTH.OTP_VERIFICATION, element: <OtpVerification /> },
+          { path: PATHS.AUTH.FORGOT_PASSWORD, element: <ForgotPassword /> },
+          { path: PATHS.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
+        ],
+      },
+    ]
+  },
+  {
+    element: <AdminLoginGuard />,
+    children: [
       { path: PATHS.AUTH.ADMIN_LOGIN, element: <AdminLoginPage /> },
-      { path: PATHS.AUTH.ROLE_SELECTION, element: <RoleSelection /> },
-      { path: PATHS.AUTH.REGISTER, element: <RegisterPage /> },
-      { path: PATHS.AUTH.OTP_VERIFICATION, element: <OtpVerification /> },
-      { path: PATHS.AUTH.FORGOT_PASSWORD, element: <ForgotPassword /> },
-      { path: PATHS.AUTH.RESET_PASSWORD, element: <ResetPassword /> },
-    ],
+    ]
   },
   
-  // Admin Dashboard Routes (KrishiYug Team)
+  // ──────────────────────────────────────────────
+  // Admin Dashboard Routes
+  // ──────────────────────────────────────────────
   {
+    path: '/admin',
     element: <RoleGuard allowedRoles={['ADMIN']} />,
     children: [
       {
         element: <AdminLayout />,
         children: [
-          { path: PATHS.ADMIN.OVERVIEW, element: <AdminOverview /> },
-          { path: '/admin/users', element: <AdminUserManagement /> },
-          { path: PATHS.ADMIN.INSURANCE.COMPANIES, element: <InsuranceCompanyManagement /> },
-          { path: PATHS.ADMIN.POLICIES, element: <AdminPolicyManagement /> },
-          { path: PATHS.ADMIN.CLAIMS, element: <ClaimsMonitoring /> },
-          { path: PATHS.ADMIN.CLAIM_DETAIL(':id'), element: <AdminClaimDetail /> },
-          { path: PATHS.ADMIN.FRAUD, element: <FraudMonitoring /> },
-          { path: PATHS.ADMIN.AUDIT_LOGS, element: <AuditLogs /> },
-          { path: PATHS.ADMIN.SETTINGS, element: <AdminSettings /> },
+          { index: true, element: <AdminOverview /> },
+          { path: 'users', element: <AdminUserManagement /> },
+          { path: 'insurance/companies', element: <InsuranceCompanyManagement /> },
+          { path: 'policies', element: <AdminPolicyManagement /> },
+          { path: 'claims', element: <ClaimsMonitoring /> },
+          { path: 'claims/:id', element: <AdminClaimDetail /> },
+          { path: 'fraud', element: <FraudMonitoring /> },
+          { path: 'audit-logs', element: <AuditLogs /> },
+          { path: 'settings', element: <AdminSettings /> },
         ],
       },
     ],
   },
 
+  // ──────────────────────────────────────────────
   // Farmer Dashboard Routes
+  // ──────────────────────────────────────────────
   {
+    path: '/farmer',
     element: <RoleGuard allowedRoles={['FARMER']} />,
     children: [
       {
         element: <FarmerLayout />,
         children: [
-          { path: PATHS.FARMER.OVERVIEW, element: <FarmerOverview /> },
-          { path: PATHS.FARMER.BROWSE, element: <FarmerBrowsePolicies /> },
-          { path: PATHS.FARMER.SUBMIT_CLAIM, element: <FarmerSubmitClaim /> },
-          { path: PATHS.FARMER.POLICIES, element: <div className="p-8"><h1 className="text-2xl font-bold text-slate-900">My Policies</h1><p className="mt-2 text-slate-500">Implemented History coming soon.</p></div> },
+          { index: true, element: <FarmerOverview /> },
+          { path: 'browse', element: <FarmerBrowsePolicies /> },
+          { path: 'submit-claim', element: <FarmerSubmitClaim /> },
+          { path: 'policies', element: <div className="p-8"><h1 className="text-2xl font-bold text-slate-900">My Policies</h1><p className="mt-2 text-slate-500">History coming soon.</p></div> },
         ],
       },
     ],
   },
 
+  // ──────────────────────────────────────────────
   // Insurance Partner Dashboard Routes
+  // ──────────────────────────────────────────────
   {
-    element: <RoleGuard allowedRoles={['INSURANCE_OFFICER', 'INSURANCE']} />,
+    path: '/insurance',
+    element: <RoleGuard allowedRoles={['INSURANCE_COMPANY', 'INSURANCE_OFFICER', 'INSURANCE']} />,
     children: [
       {
         element: <InsuranceOfficerLayout />,
         children: [
-          { path: PATHS.INSURANCE.OVERVIEW, element: <InsuranceOverview /> },
-          { path: PATHS.INSURANCE.CLAIMS, element: <InsuranceClaimsRegistry /> },
-          { path: PATHS.INSURANCE.FARMERS, element: <div className="p-8"><h1 className="text-2xl font-bold text-slate-900">Insured Farmers</h1><p className="mt-2 text-slate-500">Registry coming soon.</p></div> },
+          { index: true, element: <InsuranceOverview /> },
+          { path: 'claims', element: <InsuranceClaimsRegistry /> },
+          { path: 'farmers', element: <InsuredFarmers /> },
+          { path: 'policies', element: <ActivePolicies /> },
         ],
       },
     ],
   },
+
+  // Fallback
+  {
+    path: '*',
+    element: <Navigate to="/" replace />,
+  }
 ]);
 
 export const AppRouter = () => <RouterProvider router={router} />;

@@ -1,197 +1,224 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
-  UserRound, 
-  Building2, 
+  ShieldCheck, 
   FileText, 
-  TrendingUp, 
-  AlertTriangle,
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  TrendingUp,
+  Zap,
   ArrowUpRight,
-  ArrowDownRight,
-  Sparkles
+  Loader2,
+  Building2,
+  ShieldAlert
 } from 'lucide-react';
+import { adminAPI } from '@/services/api';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-// Re-using common components or creating local ones for now
-const StatCard = ({ title, value, change, icon: Icon, color }: any) => (
-  <motion.div 
-    whileHover={{ y: -4 }}
-    className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md"
-  >
-    <div className="flex justify-between items-start mb-4">
-      <div className={cn("p-2.5 rounded-xl", color)}>
-        <Icon className="w-5 h-5" />
-      </div>
-      {change && (
-        <div className={cn(
-          "flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full",
-          change.type === 'up' ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
-        )}>
-          {change.type === 'up' ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-          {change.value}%
-        </div>
-      )}
-    </div>
-    <div>
-      <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-      <h3 className="text-2xl font-bold text-slate-900 font-heading">{value}</h3>
-    </div>
-  </motion.div>
-);
-
 export const AdminOverview = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const user = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response: any = await adminAPI.getDashboardStats();
+      setStats(response?.data?.data);
+    } catch (err) {
+      toast.error('Failed to fetch dashboard statistics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const metricCards = [
+    {
+      label: 'Total Farmers',
+      value: stats?.farmers ?? 0,
+      icon: Users,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+      trend: '+12% this month'
+    },
+    {
+      label: 'Active Policies',
+      value: stats?.activePolicies ?? 0,
+      icon: ShieldCheck,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      trend: 'Across 4 partners'
+    },
+    {
+      label: 'Pending Verification',
+      value: stats?.claims?.pending ?? 0,
+      icon: Clock,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+      trend: 'High Priority'
+    },
+    {
+      label: 'Approved Claims',
+      value: stats?.claims?.approved ?? 0,
+      icon: CheckCircle,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      trend: 'Rs. 2.4M Disbursed'
+    },
+    {
+      label: 'Rejected Claims',
+      value: stats?.claims?.rejected ?? 0,
+      icon: XCircle,
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
+      trend: 'Fraud Prevention'
+    },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-indigo-950 font-heading mb-1">Dashboard Overview</h1>
-        <p className="text-sm text-slate-500">Welcome back, Super Admin. Here's what's happening today.</p>
-      </div>
-
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        <StatCard 
-          title="Total Users" 
-          value="12,482" 
-          change={{ type: 'up', value: 12 }} 
-          icon={Users} 
-          color="bg-indigo-50 text-indigo-600" 
-        />
-        <StatCard 
-          title="Active Farmers" 
-          value="8,245" 
-          change={{ type: 'up', value: 8 }} 
-          icon={UserRound} 
-          color="bg-amber-50 text-amber-600" 
-        />
-        <StatCard 
-          title="Ward Offices" 
-          value="753" 
-          icon={Building2} 
-          color="bg-emerald-50 text-emerald-600" 
-        />
-        <StatCard 
-          title="Total Claims" 
-          value="2,148" 
-          change={{ type: 'up', value: 15 }} 
-          icon={FileText} 
-          color="bg-blue-50 text-blue-600" 
-        />
-        <StatCard 
-          title="Fraud Alerts" 
-          value="24" 
-          change={{ type: 'down', value: 4 }} 
-          icon={AlertTriangle} 
-          color="bg-red-50 text-red-600" 
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart Placeholder */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
+    <div className="space-y-8 max-w-[1600px] mx-auto">
+      {/* Hero Banner */}
+      <div className="bg-indigo-950 rounded-[40px] p-12 text-white relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 bg-white/10 rounded-[28px] flex items-center justify-center backdrop-blur-xl border border-white/10 shadow-inner">
+              <Zap className="w-10 h-10 text-indigo-400 fill-indigo-400/20" />
+            </div>
             <div>
-              <h3 className="font-bold text-slate-900 font-heading">Claim Trends</h3>
-              <p className="text-xs text-slate-500">Monthly overview of claims filed vs approved</p>
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-2">Operational Command Center</p>
+              <h1 className="text-4xl font-black tracking-tighter text-white">
+                Welcome, {user?.name?.split(' ')[0] || 'Admin'}
+              </h1>
+              <p className="text-indigo-100/60 font-medium mt-2 max-w-md leading-relaxed">
+                Platform status is <span className="text-emerald-400 font-bold">Stable</span>. You have {stats?.claims?.pending ?? 0} claims awaiting administrative verification.
+              </p>
             </div>
-            <select className="text-sm border-slate-200 rounded-lg bg-slate-50 px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500/20">
-              <option>Last 6 Months</option>
-              <option>Last Year</option>
-            </select>
-          </div>
-          <div className="h-[300px] flex items-center justify-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
-            <div className="text-center">
-              <TrendingUp className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">Chart visualization goes here</p>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Insights Card */}
-        <div className="bg-gradient-to-br from-indigo-900 to-indigo-950 p-6 rounded-2xl shadow-xl text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <h3 className="font-bold font-heading">AI Fraud Intelligence</h3>
           </div>
           
-          <div className="space-y-4 relative z-10">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10">
-              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">High Risk Alert</p>
-              <p className="text-sm text-indigo-100">Suspicious spike in livestock claims detected in Morang district (24% above average).</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/10">
-              <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Insight</p>
-              <p className="text-sm text-indigo-100">Weather patterns suggest a 15% increase in crop damage claims next week due to predicted hailstorms.</p>
-            </div>
+          <div className="flex gap-4">
+             <div className="px-6 py-4 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md">
+                <p className="text-[9px] font-black text-indigo-300 uppercase tracking-widest mb-1 text-center">Active Farmers</p>
+                <p className="text-2xl font-black text-white text-center">{stats?.farmers ?? 0}</p>
+             </div>
+             <div className="px-6 py-4 bg-indigo-500/20 rounded-3xl border border-indigo-400/20 backdrop-blur-md">
+                <p className="text-[9px] font-black text-indigo-300 uppercase tracking-widest mb-1 text-center">System Health</p>
+                <p className="text-2xl font-black text-emerald-400 text-center">99.9%</p>
+             </div>
           </div>
-
-          <button className="w-full mt-8 py-2.5 bg-white text-indigo-950 font-bold rounded-xl text-sm hover:bg-amber-400 transition-colors">
-            View Deep Analysis
-          </button>
         </div>
       </div>
 
-      {/* Recent Activity Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="font-bold text-slate-900 font-heading">Recent Claims</h3>
-          <button className="text-sm font-bold text-indigo-600 hover:text-indigo-800">View All</button>
+      {/* Metric Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {metricCards.map((card, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="p-8 bg-white border border-slate-100 rounded-[36px] shadow-sm hover:shadow-2xl hover:shadow-indigo-900/5 transition-all group cursor-default"
+          >
+            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-inner", card.bg, card.color)}>
+              <card.icon className="w-7 h-7" />
+            </div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{card.label}</p>
+            <p className="text-4xl font-black text-slate-900 tracking-tighter mb-2">{card.value}</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{card.trend}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Fraud Monitoring Card */}
+        <div className="lg:col-span-2 bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm">
+           <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center">
+                    <ShieldAlert className="w-6 h-6" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tighter">AI Fraud Intelligence</h3>
+                    <p className="text-xs text-slate-400 font-medium">Real-time risk assessment and anomaly detection.</p>
+                 </div>
+              </div>
+              <button className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1">
+                 Full Report <ArrowUpRight className="w-3 h-3" />
+              </button>
+           </div>
+           
+           <div className="space-y-6">
+              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-rose-500 shadow-sm">
+                       <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div>
+                       <p className="text-sm font-bold text-slate-900">High Risk Claims Detected</p>
+                       <p className="text-[10px] text-slate-400 font-medium">Location mismatch in 3 active claims</p>
+                    </div>
+                 </div>
+                 <span className="px-3 py-1 bg-rose-100 text-rose-700 text-[9px] font-black rounded-full uppercase tracking-widest">Action Required</span>
+              </div>
+              
+              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-500 shadow-sm">
+                       <CheckCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                       <p className="text-sm font-bold text-slate-900">Identity Verification Status</p>
+                       <p className="text-[10px] text-slate-400 font-medium">98% of users are KYC compliant</p>
+                    </div>
+                 </div>
+                 <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[9px] font-black rounded-full uppercase tracking-widest">Healthy</span>
+              </div>
+           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Farmer</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">District</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">AI Risk</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {[
-                { name: 'Ram Bahadur', district: 'Jhapa', type: 'Paddy Crop', amount: 'Rs. 45,000', status: 'Pending', risk: 'Low', riskColor: 'text-emerald-500 bg-emerald-50' },
-                { name: 'Sita Devi', district: 'Morang', type: 'Buffalow', amount: 'Rs. 1,20,000', status: 'Under Review', risk: 'High', riskColor: 'text-red-500 bg-red-50' },
-                { name: 'Krishna Subedi', district: 'Kaski', type: 'Poultry', amount: 'Rs. 85,000', status: 'Approved', risk: 'Low', riskColor: 'text-emerald-500 bg-emerald-50' },
-                { name: 'Maya Thapa', district: 'Rupandehi', type: 'Wheat', amount: 'Rs. 32,000', status: 'Rejected', risk: 'Medium', riskColor: 'text-amber-500 bg-amber-50' },
-              ].map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-xs">
-                        {row.name.charAt(0)}
-                      </div>
-                      <span className="text-sm font-semibold text-slate-900">{row.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{row.district}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{row.type}</td>
-                  <td className="px-6 py-4 text-sm font-bold text-slate-900">{row.amount}</td>
-                  <td className="px-6 py-4">
-                    <span className={cn(
-                      "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-                      row.status === 'Pending' ? "bg-blue-50 text-blue-600 border-blue-100" :
-                      row.status === 'Approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                      row.status === 'Rejected' ? "bg-red-50 text-red-600 border-red-100" :
-                      "bg-amber-50 text-amber-600 border-amber-100"
-                    )}>
-                      {row.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold", row.riskColor)}>
-                      <div className={cn("w-1.5 h-1.5 rounded-full", row.risk === 'Low' ? 'bg-emerald-500' : row.risk === 'High' ? 'bg-red-500' : 'bg-amber-500')} />
-                      {row.risk}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+        {/* Quick Actions / Partners */}
+        <div className="bg-indigo-900 rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl">
+           <div className="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-white/5 rounded-full" />
+           <h3 className="text-xl font-black tracking-tighter mb-6 relative z-10">Quick Provisions</h3>
+           <div className="space-y-4 relative z-10">
+              <button className="w-full p-5 bg-white/10 hover:bg-white/20 rounded-3xl border border-white/10 transition-all flex items-center justify-between group">
+                 <div className="flex items-center gap-3">
+                    <Building2 className="w-5 h-5 text-indigo-300" />
+                    <span className="text-sm font-bold">Register Insurance Co.</span>
+                 </div>
+                 <ArrowUpRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </button>
+              <button className="w-full p-5 bg-white/10 hover:bg-white/20 rounded-3xl border border-white/10 transition-all flex items-center justify-between group">
+                 <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-indigo-300" />
+                    <span className="text-sm font-bold">Onboard Ward Officer</span>
+                 </div>
+                 <ArrowUpRight className="w-4 h-4 text-indigo-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </button>
+              <button className="w-full p-5 bg-indigo-500/30 hover:bg-indigo-500/40 rounded-3xl border border-indigo-400/30 transition-all flex items-center justify-between group mt-8">
+                 <div className="flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                    <span className="text-sm font-bold">Global System Audit</span>
+                 </div>
+                 <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
+              </button>
+           </div>
         </div>
       </div>
     </div>

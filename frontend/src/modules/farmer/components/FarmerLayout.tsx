@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { LogoutDialog } from '@/components/shared/LogoutDialog';
 
 const navItems = [
   { icon: Home, label: 'Overview', path: '/farmer' },
@@ -24,7 +25,10 @@ const navItems = [
 
 export const FarmerLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const location = useLocation();
+  const user = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+  const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'F';
 
   return (
     <div className="min-h-screen bg-[#f8faf8] flex overflow-hidden">
@@ -67,7 +71,10 @@ export const FarmerLayout = () => {
           </nav>
 
           <div className="pt-8 border-t border-white/5 space-y-6">
-            <button className="flex items-center gap-4 px-5 py-4 text-emerald-100/40 hover:text-white transition-colors w-full group">
+            <button
+              onClick={() => setShowLogout(true)}
+              className="flex items-center gap-4 px-5 py-4 text-emerald-100/40 hover:text-red-400 transition-colors w-full group"
+            >
               <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
               <span className="text-sm font-bold">Log Out</span>
             </button>
@@ -97,11 +104,11 @@ export const FarmerLayout = () => {
             </button>
             <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-slate-900">Ram Bahadur</p>
+                <p className="text-sm font-black text-slate-900">{user?.name || 'Farmer'}</p>
                 <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Verified Farmer</p>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner">
-                RB
+                {initials}
               </div>
             </div>
           </div>
@@ -123,6 +130,8 @@ export const FarmerLayout = () => {
           />
         )}
       </AnimatePresence>
+
+      <LogoutDialog open={showLogout} onClose={() => setShowLogout(false)} theme="emerald" />
     </div>
   );
 };

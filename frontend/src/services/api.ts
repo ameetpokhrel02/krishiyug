@@ -3,7 +3,6 @@ import type { AxiosInstance } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-// Create axios instance with default config
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,7 +10,7 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Add token to requests
+// Attach auth token to every request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
@@ -20,203 +19,166 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle responses
+// Handle 401 — redirect to role-appropriate login page
 api.interceptors.response.use(
-  (response) => response as any,
+  (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const userStr = localStorage.getItem('user');
+      let redirectPath = '/auth/login';
+      try {
+        const user = userStr ? JSON.parse(userStr) : null;
+        if (user?.role === 'admin') redirectPath = '/auth/admin-login';
+      } catch (_) {}
       localStorage.removeItem('authToken');
-      window.location.href = '/auth/login';
+      localStorage.removeItem('user');
+      window.location.href = redirectPath;
     }
     throw error.response?.data || error;
   }
 );
 
-// ==================== AUTH APIS ====================
+// ==================== AUTH ====================
+// POST /api/auth/register
+// POST /api/auth/login
+// POST /api/admin/login  (admin-specific)
 export const authAPI = {
   register: (data: {
-    phoneNumber?: string;
-    email?: string;
+    phoneNumber: string;
     password: string;
     name: string;
     role: string;
-    farmerDetails?: any;
+    farmerDetails?: {
+      farmType: 'livestock' | 'crop';
+      farmSize: number;
+      cropTypes?: string[];
+      location: { district: string; village: string; region?: string; palika?: string };
+      livestockDetails?: { earTags: string[] };
+    };
     companyName?: string;
   }) => api.post('/auth/register', data),
 
-  login: (data: { phoneNumber?: string; email?: string; password: string }) =>
+  login: (data: { phoneNumber: string; password: string }) =>
     api.post('/auth/login', data),
 
   adminLogin: (data: { identifier: string; password: string }) =>
     api.post('/admin/login', data),
 
   getCurrentUser: () => api.get('/auth/me'),
-
   updateProfile: (data: any) => api.put('/auth/profile', data),
 };
 
-// ==================== POLICY APIS ====================
-export const policyAPI = {
-  getAll: () => api.get('/policies/all'),
-
-  getById: (id: string) => api.get(`/policies/${id}`),
-
-  getRecommended: () => api.get('/policies/recommended'),
-
-  create: (data: {
-    title: string;
-    category: string;
-    description: string;
-    premiumRate: number;
-    coverageAmount: number;
-    insuranceCompanyId: string;
-  }) => api.post('/policies', data),
-
-  update: (id: string, data: any) => api.put(`/policies/${id}`, data),
-
-  toggle: (id: string) => api.patch(`/policies/${id}/toggle`),
-
-  buy: (policyId: string) => api.post('/policies/buy', { policyId }),
+// ==================== FARMER ====================
+// GET /api/farmer/profile  → { name, phoneNumber, farmerDetails }
+// GET /api/farmer/crops    → { cropTypes, farmSize, location }
+// GET /api/farmer/dashboard → { user, farmerDetails }
+export const farmerAPI = {
+  getProfile: () => api.get('/farmer/profile'),
+  getDashboard: () => api.get('/farmer/dashboard'),
+  getCrops: () => api.get('/farmer/crops'),
+  updateProfile: (data: any) => api.put('/farmer/profile', data),
 };
 
-// ==================== CLAIM APIS ====================
+// ==================== CLAIMS ====================
+// POST /api/claims/submit  (multipart) — farmer
+// GET  /api/claims/user/my-claims → array of claims
+// GET  /api/claims/:claimId/status → { claim, timeline }
 export const claimAPI = {
   submit: (data: FormData) =>
     api.post('/claims/submit', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 
-  getAll: () => api.get('/claims'),
+  getMyClaims: () => api.get('/claims/user/my-claims'),
 
-  getById: (id: string) => api.get(`/claims/${id}`),
+  getClaimStatus: (claimId: string) =>
+    api.get(`/claims/${claimId}/status`),
 
-  getUserClaims: () => api.get('/claims/user/my-claims'),
-
-  updateStatus: (id: string, status: string) =>
-    api.patch(`/claims/${id}/status`, { status }),
-
-  verify: (id: string, data: any) => api.post(`/claims/${id}/verify`, data),
-
-  reject: (id: string, data: { reason: string }) =>
-    api.post(`/claims/${id}/reject`, data),
-
-  getPending: () => api.get('/claims/pending'),
+  getById: (claimId: string) => api.get(`/claims/${claimId}`),
 };
 
-// ==================== LOCATION APIS ====================
+// ==================== POLICIES ====================
+// GET /api/policies/all → array of active policies
+// GET /api/policies/recommended → recommended for farmer
+// GET /api/policies/:id → single policy
+// POST /api/policies/buy → { policyId }
+export const policyAPI = {
+  getAll: () => api.get('/policies/all'),
+  getRecommended: () => api.get('/policies/recommended'),
+  getById: (id: string) => api.get(`/policies/${id}`),
+  buy: (policyId: string) => api.post('/policies/buy', { policyId }),
+};
+
+// ==================== INSURANCE ====================
+// All routes: role = insurance_company
+// GET /api/insurance/dashboard → { claims: { total, pendingReview, approved, rejected }, activePolicies, companyName }
+// GET /api/insurance/claims/verified → array of admin_verified claims
+// GET /api/insurance/claims/all?status=... → all claims for this company
+// POST /api/insurance/claims/decide → { claimId, action: 'approved'|'rejected', reason? }
+export const insuranceAPI = {
+  getDashboard: () => api.get('/insurance/dashboard'),
+  getVerifiedClaims: () => api.get('/insurance/claims/verified'),
+  getAllClaims: (status?: string) =>
+    api.get('/insurance/claims/all', { params: status ? { status } : {} }),
+  decideClaim: (data: { claimId: string; action: 'approved' | 'rejected'; reason?: string }) =>
+    api.post('/insurance/claims/decide', data),
+  getMyPolicies: () => api.get('/insurance/policies'),
+  getInsuredFarmers: () => api.get('/insurance/farmers'),
+};
+
+// ==================== ADMIN ====================
+// POST /api/admin/login — public
+// GET  /api/admin/dashboard/stats → { claims: { total, pending, verified, approved, rejected }, farmers, activePolicies }
+// GET  /api/admin/claims/pending → pending claims
+// GET  /api/admin/claims/all?status=... → all claims
+// POST /api/admin/claims/verify → { claimId, remarks? }
+// POST /api/admin/claims/reject → { claimId, reason? }
+// POST /api/admin/insurance-company → { name, phoneNumber, password, companyName }
+export const adminAPI = {
+  getDashboardStats: () => api.get('/admin/dashboard/stats'),
+  getPendingClaims: () => api.get('/admin/claims/pending'),
+  getAllClaims: (status?: string) =>
+    api.get('/admin/claims/all', { params: status ? { status } : {} }),
+  verifyClaim: (claimId: string, remarks?: string) =>
+    api.post('/admin/claims/verify', { claimId, remarks }),
+  rejectClaim: (claimId: string, reason: string) =>
+    api.post('/admin/claims/reject', { claimId, reason }),
+  createInsuranceCompany: (data: { name: string; phoneNumber: string; password: string; companyName: string }) =>
+    api.post('/admin/insurance-company', data),
+  getInsuranceCompanies: () => api.get('/admin/insurance-companies'),
+  getUsers: (role?: string) => api.get('/admin/users', { params: role ? { role: role.toLowerCase() } : {} }),
+  provisionUser: (data: any) => api.post('/admin/provision-user', data),
+};
+
+// ==================== LOCATION ====================
+// POST /api/location/reverse-geocode → { lat, lng }
+// GET  /api/location/districts
+// GET  /api/location/palikas/:district
 export const locationAPI = {
   reverseGeocode: (lat: number, lng: number) =>
     api.post('/location/reverse-geocode', { lat, lng }),
-
   getDistricts: () => api.get('/location/districts'),
-
-  getPalikas: (district: string) =>
-    api.get(`/location/palikas/${district}`),
-
-  getWards: (district: string, palika: string) =>
-    api.get(`/location/wards/${district}/${palika}`),
+  getPalikas: (district: string) => api.get(`/location/palikas/${district}`),
 };
 
-// ==================== ADMIN APIS ====================
-export const adminAPI = {
-  getDashboardStats: () => api.get('/admin/dashboard/stats'),
-
-  getUsers: (role?: string) =>
-    api.get('/admin/users', { params: { role } }),
-
-  getUserById: (id: string) => api.get(`/admin/users/${id}`),
-
-  getClaims: (status?: string) =>
-    api.get('/admin/claims', { params: { status } }),
-
-  getPendingClaims: () => api.get('/admin/claims/pending'),
-
-  getAllClaims: () => api.get('/admin/claims/all'),
-
-  verifyClaim: (id: string, data: any) =>
-    api.post(`/admin/claims/${id}/verify`, data),
-
-  rejectClaim: (id: string, reason: string) =>
-    api.post(`/admin/claims/${id}/reject`, { reason }),
-
-  getPolicies: () => api.get('/admin/policies'),
-
-  createPolicy: (data: any) => api.post('/admin/policies', data),
-
-  updatePolicy: (id: string, data: any) =>
-    api.put(`/admin/policies/${id}`, data),
-
-  createInsuranceCompany: (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => api.post('/admin/insurance-company', data),
-
-  getFarmers: () => api.get('/admin/farmers'),
-
-  getInsuranceCompanies: () => api.get('/admin/insurance-companies'),
-};
-
-// ==================== INSURANCE APIs ====================
-export const insuranceAPI = {
-  getAssignedClaims: () => api.get('/insurance/claims'),
-
-  getClaimById: (id: string) => api.get(`/insurance/claims/${id}`),
-
-  settleClaim: (id: string, data: { settlementAmount: number }) =>
-    api.post(`/insurance/claims/${id}/settle`, data),
-
-  rejectClaim: (id: string, reason: string) =>
-    api.post(`/insurance/claims/${id}/reject`, { reason }),
-
-  getCompanyStats: () => api.get('/insurance/stats'),
-
-  searchClaims: (query: string) =>
-    api.get('/insurance/claims/search', { params: { q: query } }),
-};
-
-// ==================== FARMER APIS ====================
-export const farmerAPI = {
-  getProfile: () => api.get('/farmer/profile'),
-
-  updateProfile: (data: any) => api.put('/farmer/profile', data),
-
-  getActivePolicies: () => api.get('/farmer/policies'),
-
-  getPolicyById: (id: string) => api.get(`/farmer/policies/${id}`),
-
-  getClaimsHistory: () => api.get('/farmer/claims'),
-
-  getClaimById: (id: string) => api.get(`/farmer/claims/${id}`),
-
-  getTransactions: () => api.get('/farmer/transactions'),
-
-  getBrowsePolicies: () => api.get('/farmer/browse-policies'),
-};
-
-// ==================== AI APIS ====================
+// ==================== AI ====================
+// POST /api/ai/chat → { history }
+// POST /api/ai/voice-claim → { transcript }
+// POST /api/ai/image-analysis → { imageUrl }
 export const aiAPI = {
   chat: (history: any[]) => api.post('/ai/chat', { history }),
-
-  voiceClaim: (transcript: string) =>
-    api.post('/ai/voice-claim', { transcript }),
-
-  imageAnalysis: (imageUrl: string) =>
-    api.post('/ai/image-analysis', { imageUrl }),
-
-  textToSpeech: (text: string, language: string = 'en') =>
-    api.post('/ai/tts', { text, language }),
+  voiceClaim: (transcript: string) => api.post('/ai/voice-claim', { transcript }),
+  imageAnalysis: (imageUrl: string) => api.post('/ai/image-analysis', { imageUrl }),
 };
 
-// ==================== NOTIFICATION APIS ====================
+// ==================== NOTIFICATIONS ====================
+// GET /api/notifications
+// GET /api/notifications/unread
+// PUT /api/notifications/:id/read
 export const notificationAPI = {
   getAll: () => api.get('/notifications'),
-
   getUnread: () => api.get('/notifications/unread'),
-
   markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
-
-  deleteNotification: (id: string) => api.delete(`/notifications/${id}`),
 };
 
 export default api;

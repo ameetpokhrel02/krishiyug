@@ -1,248 +1,158 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  UserRound, 
+  Users, 
   Building2, 
-  ShieldAlert, 
   FileText, 
-  PieChart, 
-  Bell, 
-  Settings, 
-  LogOut,
-  ChevronRight,
+  ShieldAlert, 
+  History, 
+  Settings,
   Menu,
   X,
   Search,
-  UserCircle
+  Bell,
+  LogOut,
+  ChevronRight,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { LogoutDialog } from '@/components/shared/LogoutDialog';
 
 const navItems = [
-  { label: 'Overview', icon: LayoutDashboard, path: '/admin' },
-  { label: 'Farmer Management', icon: UserRound, path: '/admin/farmers' },
-  { 
-    label: 'Ward Management', 
-    icon: Building2, 
-    items: [
-      { label: 'Municipalities', path: '/admin/wards/municipalities' },
-      { label: 'Ward Officers', path: '/admin/wards/officers' },
-    ]
-  },
-  { 
-    label: 'Insurance Management', 
-    icon: ShieldAlert, 
-    items: [
-      { label: 'Companies', path: '/admin/insurance/companies' },
-      { label: 'Insurance Officers', path: '/admin/insurance/officers' },
-    ]
-  },
-  { label: 'Claims Monitoring', icon: FileText, path: '/admin/claims' },
-  { label: 'Fraud Detection', icon: ShieldAlert, path: '/admin/fraud' },
-  { label: 'Analytics', icon: PieChart, path: '/admin/analytics' },
-  { label: 'Audit Logs', icon: FileText, path: '/admin/audit-logs' },
+  { icon: LayoutDashboard, label: 'Overview', path: '/admin' },
+  { icon: Users, label: 'User Management', path: '/admin/users' },
+  { icon: Building2, label: 'Insurance Partners', path: '/admin/insurance/companies' },
+  { icon: ShieldCheck, label: 'Policy Registry', path: '/admin/policies' },
+  { icon: FileText, label: 'Claims Monitoring', path: '/admin/claims' },
+  { icon: ShieldAlert, label: 'Fraud Detection', path: '/admin/fraud' },
+  { icon: History, label: 'Audit Logs', path: '/admin/audit-logs' },
+  { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
-const SidebarItem = ({ item, isCollapsed }: { item: any; isCollapsed: boolean }) => {
-  const location = useLocation();
-  const [isOpen, setIsOpen] = React.useState(false);
-  const isActive = location.pathname === item.path || item.items?.some((sub: any) => sub.path === location.pathname);
-
-  if (item.items) {
-    return (
-      <div className="mb-1">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className={cn(
-            "w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group",
-            isActive ? "bg-indigo-50 text-indigo-900" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-          )}
-        >
-          <div className="flex items-center gap-3">
-            <item.icon className={cn("w-5 h-5", isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
-            {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-          </div>
-          {!isCollapsed && (
-            <ChevronRight className={cn("w-4 h-4 transition-transform duration-200", isOpen && "rotate-90")} />
-          )}
-        </button>
-        {isOpen && !isCollapsed && (
-          <div className="ml-9 mt-1 space-y-1">
-            {item.items.map((sub: any) => (
-              <Link
-                key={sub.path}
-                to={sub.path}
-                className={cn(
-                  "block px-3 py-1.5 text-sm rounded-md transition-colors",
-                  location.pathname === sub.path 
-                    ? "text-indigo-600 font-medium" 
-                    : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
-                )}
-              >
-                {sub.label}
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      to={item.path}
-      className={cn(
-        "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 mb-1 group",
-        location.pathname === item.path 
-          ? "bg-indigo-50 text-indigo-900 shadow-sm" 
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-      )}
-    >
-      <item.icon className={cn("w-5 h-5", location.pathname === item.path ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600")} />
-      {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-    </Link>
-  );
-};
-
 export const AdminLayout = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const location = useLocation();
+  const user = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch { return {}; } })();
+  const initials = user?.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'SA';
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-inter">
-      {/* Sidebar Desktop */}
-      <aside 
-        className={cn(
-          "hidden lg:flex flex-col bg-white border-r border-slate-200 transition-all duration-300 fixed h-full z-30",
-          isSidebarCollapsed ? "w-20" : "w-64"
-        )}
-      >
-        <div className="p-6 flex items-center gap-3 border-b border-slate-50">
-          <div className="w-8 h-8 rounded-lg bg-indigo-900 flex items-center justify-center shrink-0">
-            <div className="w-4 h-4 rounded-sm bg-amber-500" />
-          </div>
-          {!isSidebarCollapsed && (
-            <span className="font-heading font-bold text-xl text-indigo-950 tracking-tight">Krishiyug</span>
-          )}
-        </div>
-
-        <nav className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-          <div className="mb-4">
-            {!isSidebarCollapsed && <p className="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Main Menu</p>}
-            {navItems.map((item) => (
-              <SidebarItem key={item.label} item={item} isCollapsed={isSidebarCollapsed} />
-            ))}
+    <div className="min-h-screen bg-[#f8fafc] flex overflow-hidden">
+      {/* Sidebar */}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 w-72 bg-indigo-950 text-white transition-transform duration-300 lg:translate-x-0 lg:static lg:block shadow-2xl",
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="h-full flex flex-col p-8">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-12 h-12 bg-indigo-900 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg group-hover:rotate-6 transition-transform">
+              <Zap className="w-7 h-7 text-indigo-400 fill-indigo-400/20" />
+            </div>
+            <div>
+               <span className="text-2xl font-black tracking-tighter text-white uppercase leading-none block">Krishiyug</span>
+               <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mt-1">Platform Admin</span>
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-50">
-             {!isSidebarCollapsed && <p className="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">System</p>}
-             <SidebarItem item={{ label: 'Notifications', icon: Bell, path: '/admin/notifications' }} isCollapsed={isSidebarCollapsed} />
-             <SidebarItem item={{ label: 'Settings', icon: Settings, path: '/admin/settings' }} isCollapsed={isSidebarCollapsed} />
-          </div>
-        </nav>
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1.5 overflow-y-auto pr-2 custom-scrollbar">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all group relative",
+                    isActive 
+                      ? "bg-indigo-600 text-white font-bold shadow-xl shadow-indigo-600/20" 
+                      : "text-indigo-100/50 hover:bg-white/5 hover:text-white"
+                  )}
+                >
+                  <item.icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-indigo-100/30")} />
+                  <span className="text-sm tracking-tight">{item.label}</span>
+                  {isActive && <motion.div layoutId="activeNavAdmin" className="absolute left-0 w-1 h-6 bg-white rounded-r-full" />}
+                </Link>
+              );
+            })}
+          </nav>
 
-        <div className="p-4 border-t border-slate-50">
-          <button className="flex items-center gap-3 w-full px-3 py-2 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors group">
-            <LogOut className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
-            {!isSidebarCollapsed && <span className="text-sm font-medium">Logout</span>}
-          </button>
+          {/* User Profile Summary */}
+          <div className="pt-8 border-t border-white/5 space-y-6">
+            <div className="bg-white/5 p-5 rounded-3xl border border-white/5">
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Authenticated As</p>
+              <p className="text-sm font-bold text-white truncate">{user?.name || 'System Admin'}</p>
+            </div>
+            <button
+              onClick={() => setShowLogout(true)}
+              className="flex items-center gap-4 px-5 py-4 text-indigo-100/40 hover:text-red-400 transition-colors w-full group"
+            >
+              <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+              <span className="text-sm font-bold uppercase tracking-widest text-[10px]">Sign Out System</span>
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1 transition-all duration-300 min-w-0",
-        isSidebarCollapsed ? "lg:ml-20" : "lg:ml-64"
-      )}>
-        {/* Top Navbar */}
-        <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-20 px-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="hidden lg:flex" 
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            
-            <div className="hidden sm:flex items-center bg-slate-100 rounded-full px-3 py-1.5 w-64 lg:w-96 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all border border-transparent focus-within:border-indigo-500/30">
-              <Search className="w-4 h-4 text-slate-400 mr-2" />
-              <input 
-                type="text" 
-                placeholder="Search everything..." 
-                className="bg-transparent border-none focus:ring-0 text-sm w-full outline-none text-slate-600 placeholder:text-slate-400"
-              />
-            </div>
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="h-24 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+          <div className="flex items-center gap-6">
+             <button 
+               className="lg:hidden p-3 bg-slate-50 text-slate-600 rounded-xl"
+               onClick={() => setIsSidebarOpen(true)}
+             >
+               <Menu className="w-6 h-6" />
+             </button>
+             <div className="relative w-96 hidden xl:block">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+               <input 
+                 type="text" 
+                 placeholder="Search platform resources, users, or claims..." 
+                 className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-[20px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all text-sm font-medium"
+               />
+             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-            </Button>
-            
-            <div className="h-8 w-px bg-slate-200 mx-1" />
-            
-            <button className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-slate-50 transition-colors">
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-slate-900 leading-none">Amit Pokhrel</p>
-                <p className="text-[10px] text-slate-500 mt-1">Super Admin</p>
-              </div>
-              <div className="w-8 h-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center">
-                <UserCircle className="w-5 h-5 text-indigo-600" />
-              </div>
+          <div className="flex items-center gap-6">
+            <button className="p-3 bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 relative group transition-all">
+              <Bell className="w-5 h-5 group-hover:rotate-12" />
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-white" />
             </button>
+            <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-black text-slate-900">{user?.name || 'Admin'}</p>
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Super Administrator</p>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-black text-indigo-600 text-xs shadow-inner">
+                {initials}
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <div className="p-4 lg:p-8">
+        <div className="p-10 overflow-y-auto bg-slate-50/50 flex-1">
           <Outlet />
         </div>
       </main>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[100] flex">
-          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
-          <motion.aside 
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            className="relative w-72 bg-white h-full flex flex-col shadow-2xl"
-          >
-            <div className="p-6 flex items-center justify-between border-b border-slate-50">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-900 flex items-center justify-center">
-                  <div className="w-4 h-4 rounded-sm bg-amber-500" />
-                </div>
-                <span className="font-heading font-bold text-xl text-indigo-950 tracking-tight">Krishiyug</span>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            
-            <nav className="flex-1 overflow-y-auto p-4">
-              {navItems.map((item) => (
-                <SidebarItem key={item.label} item={item} isCollapsed={false} />
-              ))}
-            </nav>
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-indigo-950/40 backdrop-blur-md z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
 
-            <div className="p-4 border-t border-slate-50">
-              <button className="flex items-center gap-3 w-full px-3 py-3 text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span className="text-sm font-medium">Logout</span>
-              </button>
-            </div>
-          </motion.aside>
-        </div>
-      )}
+      <LogoutDialog open={showLogout} onClose={() => setShowLogout(false)} theme="indigo" />
     </div>
   );
 };
