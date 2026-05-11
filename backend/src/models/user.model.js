@@ -28,20 +28,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Role is required"],
       enum: {
-        values: ["farmer", "ward_official", "insurance_agent"],
-        message: "Role must be farmer, ward_official, or insurance_agent",
+        values: ["farmer", "insurance_company", "admin"],
+        message: "Role must be farmer, insurance_company, or admin",
       },
     },
     // Role-specific fields
-    wardNumber: {
-      type: String,
-      trim: true,
-    },
-    insuranceCompanyId: {
+    companyName: {
       type: String,
       trim: true,
     },
     farmerDetails: {
+      farmType: {
+        type: String,
+        enum: ["livestock", "crop"],
+      },
       farmSize: {
         type: Number,
         min: [0, "Farm size must be positive"],
@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema(
       location: {
         district: String,
         village: String,
+        region: String,
+      },
+      livestockDetails: {
+        earTags: [String],
       },
     },
   },
@@ -67,11 +71,8 @@ userSchema.pre("save", async function () {
 
 // Validate role-specific fields
 userSchema.pre("save", async function () {
-  if (this.role === "ward_official" && !this.wardNumber) {
-    throw new Error("Ward number is required for ward officials");
-  }
-  if (this.role === "insurance_agent" && !this.insuranceCompanyId) {
-    throw new Error("Insurance company ID is required for insurance agents");
+  if (this.role === "insurance_company" && !this.companyName) {
+    throw new Error("Company name is required for insurance companies");
   }
   if (this.role === "farmer" && !this.farmerDetails) {
     throw new Error("Farmer details are required for farmers");
