@@ -1,95 +1,90 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { PATHS } from '@/routes/paths';
 
 export const LoginPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const selectedRole = location.state?.selectedRole || 'FARMER';
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Dummy logic for now
-    navigate(PATHS.DASHBOARD.FARMER);
+  const roleLabels: Record<string, string> = {
+    FARMER: 'Farmer',
+    WARD_OFFICER: 'Ward Officer',
+    INSURANCE_OFFICER: 'Insurance Officer',
+    ADMIN: 'Administrator'
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4 }}
-      className="w-full"
-    >
-      <div className="mb-8">
-        <Link to={PATHS.AUTH.WELCOME} className="text-sm text-slate-500 hover:text-indigo-600 mb-6 inline-block transition-colors">
-          &larr; Back to welcome
-        </Link>
-        <h1 className="text-3xl font-heading font-bold text-indigo-950 mb-2">
-          Welcome back
-        </h1>
-        <p className="text-slate-500">
-          Enter your details to access your account.
-        </p>
-      </div>
-
-      <form onSubmit={handleLogin} className="space-y-5">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Email or Phone</label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-slate-400" />
-            </div>
-            <input
-              type="text"
-              required
-              className="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
-              placeholder="Enter your email or phone"
-            />
+    <div className="flex-1 flex flex-col p-8 lg:p-12 justify-center bg-white">
+      <div className="max-w-sm mx-auto w-full">
+        <div className="mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full mb-4 border border-emerald-100">
+             <ShieldCheck className="w-3 h-3" />
+             <span className="text-[10px] font-bold uppercase tracking-widest">{roleLabels[selectedRole]} Access</span>
           </div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tighter mb-2 font-heading">Welcome Back</h1>
+          <p className="text-slate-500 text-sm">Secure login to your agricultural dashboard.</p>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-slate-700">Password</label>
-            <Link to={PATHS.AUTH.FORGOT_PASSWORD} className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-              Forgot password?
-            </Link>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-slate-400" />
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate(PATHS.DASHBOARD[selectedRole as keyof typeof PATHS.DASHBOARD] || '/admin'); }}>
+          <div className="space-y-1.5">
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Contact Identity</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Phone or Email" 
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm"
+              />
             </div>
-            <input
-              type={showPassword ? 'text' : 'password'}
-              required
-              className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm"
-              placeholder="Enter your password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
-            >
-              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-            </button>
           </div>
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Security Key</label>
+              <Link to={PATHS.AUTH.FORGOT_PASSWORD} className="text-[10px] font-bold text-emerald-600 hover:underline">Forgot?</Link>
+            </div>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type={showPassword ? "text" : "password"} 
+                placeholder="••••••••" 
+                className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full h-14 bg-emerald-950 hover:bg-black text-white rounded-2xl font-bold shadow-2xl shadow-emerald-200 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-[11px]">
+            Sign In to System
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </form>
+
+        <div className="mt-8 text-center space-y-6">
+          <p className="text-slate-500 text-sm">
+            New to Krishiyug? {' '}
+            <Link to={PATHS.AUTH.ROLE_SELECTION} className="text-emerald-600 font-bold hover:underline">Register Here</Link>
+          </p>
+          <div className="flex items-center gap-4 py-2 opacity-30">
+            <div className="h-px bg-slate-400 flex-1" />
+            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Digital Trust Network</span>
+            <div className="h-px bg-slate-400 flex-1" />
+          </div>
+          <p className="text-[9px] text-slate-400 leading-relaxed px-4 italic">
+            "Agriculture is our wisest pursuit, because it will in the end contribute most to real wealth, good morals & happiness."
+          </p>
         </div>
-
-        <button
-          type="submit"
-          className="w-full py-3 px-4 bg-indigo-900 text-white rounded-xl font-medium hover:bg-indigo-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 transition-all shadow-md mt-6"
-        >
-          Sign In
-        </button>
-      </form>
-
-      <div className="mt-8 text-center text-sm text-slate-500">
-        Don't have an account?{' '}
-        <Link to={PATHS.AUTH.ROLE_SELECTION} className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-          Register now
-        </Link>
       </div>
-    </motion.div>
+    </div>
   );
 };

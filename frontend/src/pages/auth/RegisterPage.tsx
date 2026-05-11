@@ -1,237 +1,146 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Phone, MapPin, ArrowRight, ShieldCheck, ChevronLeft, Locate, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { PATHS } from '@/routes/paths';
-import { MapPin, Loader2 } from 'lucide-react';
 import axios from 'axios';
-import { LocationMapPicker } from '@/components/common/LocationMapPicker';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const RegisterPage = () => {
-  const [searchParams] = useSearchParams();
-  const role = searchParams.get('role') || 'farmer';
   const navigate = useNavigate();
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [location, setLocation] = useState({ district: '', palika: '' });
 
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
-  const [formData, setFormData] = useState<Record<string, string>>({});
-
-  const handleMapLocationSelect = (location: { district: string; municipality: string; lat: number; lng: number }) => {
-    setFormData(prev => ({
-      ...prev,
-      district: location.district || prev.district,
-      municipality: location.municipality || prev.municipality,
-    }));
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (role === 'insurance') {
-      localStorage.setItem('mockRole', 'INSURANCE');
-      navigate(PATHS.DASHBOARD.INSURANCE);
-    } else {
-      navigate(PATHS.AUTH.OTP_VERIFICATION);
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
     }
-  };
 
-  const detectLocation = () => {
-    setIsLoadingLocation(true);
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-            
-            if (apiKey) {
-              const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`);
-              
-              if (response.data.results && response.data.results.length > 0) {
-                const addressComponents = response.data.results[0].address_components;
-                
-                let district = '';
-                let municipality = '';
-                
-                addressComponents.forEach((comp: any) => {
-                  if (comp.types.includes('administrative_area_level_3') || comp.types.includes('locality')) {
-                    municipality = comp.long_name;
-                  }
-                  if (comp.types.includes('administrative_area_level_2')) {
-                    district = comp.long_name;
-                  }
-                });
+    setIsDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await axios.post(`${API_URL}/location/reverse-geocode`, {
+            lat: latitude,
+            lng: longitude
+          });
 
-                setFormData(prev => ({
-                  ...prev,
-                  district: district || prev.district,
-                  municipality: municipality || prev.municipality
-                }));
-              }
-            }
-          } catch (error) {
-            console.error('Error fetching location data', error);
-          } finally {
-            setIsLoadingLocation(false);
+          if (response.data.success) {
+            setLocation({
+              district: response.data.data.district || '',
+              palika: response.data.data.palika || ''
+            });
           }
-        },
-        (error) => {
-          console.error('Geolocation error', error);
-          setIsLoadingLocation(false);
+        } catch (error) {
+          console.error("Location Detection Error:", error);
+          alert("Failed to detect location. Please enter manually.");
+        } finally {
+          setIsDetecting(false);
         }
-      );
-    } else {
-      setIsLoadingLocation(false);
-    }
-  };
-
-  const renderFields = () => {
-    switch (role) {
-      case 'farmer':
-        return (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Full Name</label>
-                <input type="text" name="fullName" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="e.g. Ram Bahadur" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Phone Number</label>
-                <input type="tel" name="phone" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="98XXXXXXXX" />
-              </div>
-              
-              <div className="col-span-2 flex justify-end gap-2">
-                 <LocationMapPicker onLocationSelect={handleMapLocationSelect} />
-                 <button type="button" onClick={detectLocation} disabled={isLoadingLocation} className="text-xs font-medium text-indigo-600 flex items-center gap-1 hover:text-indigo-800 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-md border border-indigo-100">
-                   {isLoadingLocation ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPin className="w-3 h-3" />}
-                   Auto-detect
-                 </button>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">District</label>
-                <input type="text" name="district" value={formData.district || ''} onChange={handleInputChange} required className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="District" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Municipality</label>
-                <input type="text" name="municipality" value={formData.municipality || ''} onChange={handleInputChange} required className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="Municipality/Ward" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Insurance Number (Optional)</label>
-                <input type="text" name="insuranceNumber" onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="If applicable" />
-              </div>
-            </div>
-          </>
-          );
-      case 'ward':
-        return (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Officer Name</label>
-                <input type="text" name="officerName" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Designation</label>
-                <input type="text" name="designation" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="e.g. Agriculture Officer" />
-              </div>
-              <div className="col-span-2 flex justify-end gap-2">
-                 <LocationMapPicker onLocationSelect={handleMapLocationSelect} />
-                 <button type="button" onClick={detectLocation} disabled={isLoadingLocation} className="text-xs font-medium text-indigo-600 flex items-center gap-1 hover:text-indigo-800 transition-colors bg-indigo-50 px-2.5 py-1.5 rounded-md border border-indigo-100">
-                   {isLoadingLocation ? <Loader2 className="w-3 h-3 animate-spin" /> : <MapPin className="w-3 h-3" />}
-                   Auto-detect
-                 </button>
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Municipality</label>
-                <input type="text" name="municipality" value={formData.municipality || ''} required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Office Email</label>
-                <input type="email" name="email" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="officer@ward.gov.np" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Phone</label>
-                <input type="tel" name="phone" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-              </div>
-            </div>
-          </>
-        );
-      case 'insurance':
-        return (
-          <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Officer Name</label>
-                <input type="text" name="officerName" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Insurance Company</label>
-                <select name="company" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
-                  <option value="">Select Company</option>
-                  <option value="shikhar">Shikhar Insurance</option>
-                  <option value="nlgi">NLGI Insurance</option>
-                  <option value="sagarmatha">Sagarmatha Insurance</option>
-                </select>
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Official Email</label>
-                <input type="email" name="email" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" placeholder="name@company.com.np" />
-              </div>
-              <div className="space-y-1.5 col-span-2">
-                <label className="text-sm font-medium text-slate-700">Phone</label>
-                <input type="tel" name="phone" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-              </div>
-            </div>
-          </>
-        );
-      default:
-        return (
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Full Name</label>
-              <input type="text" name="fullName" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-slate-700">Phone Number</label>
-              <input type="tel" name="phone" required onChange={handleInputChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
-            </div>
-          </div>
-        );
-    }
+      },
+      (error) => {
+        console.error("Geolocation Error:", error);
+        alert("Permission denied or location unavailable.");
+        setIsDetecting(false);
+      }
+    );
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4 }}
-      className="w-full"
-    >
-      <div className="mb-8">
-        <Link to={PATHS.AUTH.ROLE_SELECTION} className="text-sm text-slate-500 hover:text-indigo-600 mb-6 inline-block transition-colors">
-          &larr; Change Role
+    <div className="flex-1 flex flex-col p-8 lg:p-12 justify-center">
+      <div className="max-w-sm mx-auto w-full">
+        <Link to={PATHS.AUTH.ROLE_SELECTION} className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors mb-8">
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Change Role
         </Link>
-        <h1 className="text-3xl font-heading font-bold text-indigo-950 mb-2 capitalize">
-          {role} Registration
-        </h1>
-        <p className="text-slate-500">
-          Enter your details to create your account.
-        </p>
+
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 font-heading mb-2">Farmer Registry</h1>
+          <p className="text-slate-500 text-sm">Join the ecosystem to protect your agricultural assets.</p>
+        </div>
+
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); navigate(PATHS.AUTH.OTP_VERIFICATION); }}>
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Ram Bahadur" 
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input 
+                type="tel" 
+                placeholder="98XXXXXXXX" 
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+             <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-slate-700">Farm Location</label>
+                <button 
+                  type="button"
+                  onClick={handleDetectLocation}
+                  disabled={isDetecting}
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                >
+                  {isDetecting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Locate className="w-3 h-3" />}
+                  Auto-Detect
+                </button>
+             </div>
+             <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input 
+                    type="text" 
+                    value={location.district}
+                    onChange={(e) => setLocation({...location, district: e.target.value})}
+                    placeholder="District" 
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all"
+                  />
+                </div>
+                <input 
+                  type="text" 
+                  value={location.palika}
+                  onChange={(e) => setLocation({...location, palika: e.target.value})}
+                  placeholder="Palika" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm transition-all"
+                />
+             </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 mt-6">
+             <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+             <p className="text-[10px] text-emerald-800 leading-relaxed font-medium">
+               Real-time GPS tracking is enabled for your land. By registering, you agree to provide accurate field coordinates for insurance verification.
+             </p>
+          </div>
+
+          <Button type="submit" className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xl shadow-emerald-200 transition-all active:scale-[0.98] mt-4">
+            Verify & Create Account
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-slate-500 text-sm">
+            Already have an account? {' '}
+            <Link to={PATHS.AUTH.LOGIN} className="text-indigo-600 font-bold hover:underline">Log in</Link>
+          </p>
+        </div>
       </div>
-
-      <form onSubmit={handleRegister} className="space-y-5">
-        
-        {renderFields()}
-
-        <button
-          type="submit"
-          className="w-full py-3 px-4 bg-indigo-900 text-white rounded-xl font-medium hover:bg-indigo-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 transition-all shadow-md mt-6"
-        >
-          Continue
-        </button>
-      </form>
-    </motion.div>
+    </div>
   );
 };

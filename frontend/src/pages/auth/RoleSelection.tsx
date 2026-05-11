@@ -1,65 +1,100 @@
 import { motion } from 'framer-motion';
-import { Tractor, Building2, Shield, ShieldAlert } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Tractor, 
+  ShieldCheck, 
+  Settings, 
+  ChevronLeft
+} from 'lucide-react';
 import { PATHS } from '@/routes/paths';
+import { cn } from '@/lib/utils';
+
+const roles = [
+  {
+    id: 'FARMER',
+    title: 'Farmer',
+    description: 'Protect your crops & livestock',
+    icon: Tractor,
+    color: 'bg-emerald-50 text-emerald-600',
+    borderColor: 'hover:border-emerald-500',
+  },
+  {
+    id: 'INSURANCE_OFFICER',
+    title: 'Insurance Partner',
+    description: 'Process & verify claims',
+    icon: ShieldCheck,
+    color: 'bg-emerald-50 text-emerald-600',
+    borderColor: 'hover:border-emerald-500',
+  },
+  {
+    id: 'ADMIN',
+    title: 'KrishiYug Team',
+    description: 'Platform verification & mediation',
+    icon: Settings,
+    color: 'bg-slate-50 text-slate-600',
+    borderColor: 'hover:border-slate-500',
+  },
+];
 
 export const RoleSelection = () => {
   const navigate = useNavigate();
 
-  const roles = [
-    { id: 'farmer', title: 'Farmer', icon: Tractor, desc: 'File claims & track status', color: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
-    { id: 'ward', title: 'Ward Officer', icon: Building2, desc: 'Verify local claims', color: 'bg-blue-50 text-blue-600 border-blue-200' },
-    { id: 'insurance', title: 'Insurance Officer', icon: Shield, desc: 'Process payouts', color: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
-    { id: 'admin', title: 'Admin', icon: ShieldAlert, desc: 'Platform management', color: 'bg-slate-100 text-slate-700 border-slate-300' },
-  ];
-
-  const handleSelectRole = (roleId: string) => {
-    navigate(`${PATHS.AUTH.REGISTER}?role=${roleId}`);
+  const handleRoleSelect = (roleId: string) => {
+    if (roleId === 'FARMER') {
+      // Farmers can register or login
+      navigate(PATHS.AUTH.LOGIN, { state: { selectedRole: roleId, isNewUser: true } });
+    } else {
+      // Insurers and Admins must be onboarded by KrishiYug
+      navigate(PATHS.AUTH.LOGIN, { state: { selectedRole: roleId } });
+    }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4 }}
-      className="w-full"
-    >
-      <div className="mb-8">
-        <Link to={PATHS.AUTH.WELCOME} className="text-sm text-slate-500 hover:text-indigo-600 mb-6 inline-block transition-colors">
-          &larr; Back
+    <div className="flex-1 flex flex-col p-8 lg:p-12 justify-center bg-white">
+      <div className="max-w-md mx-auto w-full">
+        <Link to={PATHS.HOME} className="inline-flex items-center text-[10px] font-black text-slate-400 hover:text-emerald-600 transition-colors mb-12 uppercase tracking-[0.2em]">
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Back to Portal
         </Link>
-        <h1 className="text-3xl font-heading font-bold text-indigo-950 mb-2">
-          Choose Your Role
-        </h1>
-        <p className="text-slate-500">
-          Select how you want to use the Krishiyug platform.
+
+        <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-4">Identify Yourself</h1>
+        <p className="text-slate-500 mb-12 text-sm font-medium leading-relaxed">
+          Select your role to access the Krishiyug ecosystem. Farmers can self-register, while partners must be onboarded by our team.
         </p>
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {roles.map((role) => (
-          <motion.button
-            key={role.id}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => handleSelectRole(role.id)}
-            className="flex flex-col items-start p-4 bg-white border border-slate-200 rounded-2xl hover:border-indigo-400 hover:shadow-md transition-all text-left"
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 border ${role.color}`}>
-              <role.icon className="w-5 h-5" />
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-1">{role.title}</h3>
-            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{role.desc}</p>
-          </motion.button>
-        ))}
-      </div>
+        <div className="grid grid-cols-1 gap-4">
+          {roles.map((role) => (
+            <motion.button
+              key={role.id}
+              whileHover={{ x: 8 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleRoleSelect(role.id)}
+              className={cn(
+                "p-8 rounded-[32px] border-2 border-slate-100 text-left transition-all group flex items-center gap-6 shadow-sm hover:shadow-xl",
+                role.borderColor
+              )}
+            >
+              <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center transition-all group-hover:rotate-6 shadow-inner", role.color)}>
+                <role.icon className="w-8 h-8" />
+              </div>
+              <div>
+                 <h3 className="font-black text-slate-900 text-lg tracking-tight">{role.title}</h3>
+                 <p className="text-[10px] text-slate-400 leading-relaxed font-black uppercase tracking-widest mt-1">{role.description}</p>
+              </div>
+            </motion.button>
+          ))}
+        </div>
 
-      <div className="mt-8 text-center text-sm text-slate-500">
-        Already have an account?{' '}
-        <Link to={PATHS.AUTH.LOGIN} className="font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
-          Log in
-        </Link>
+        <div className="mt-16 text-center">
+           <div className="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 mb-8">
+              <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest mb-2">Need Partnership?</p>
+              <p className="text-xs text-emerald-600 font-medium">Contact partnership@krishiyug.com for onboarding.</p>
+           </div>
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+            Official krishiyug.com trust network
+          </p>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };

@@ -3,6 +3,7 @@ export const PATHS = {
   AUTH: {
     WELCOME: '/auth/welcome',
     LOGIN: '/auth/login',
+    ADMIN_LOGIN: '/auth/admin-login',
     REGISTER: '/auth/register',
     ROLE_SELECTION: '/auth/role-selection',
     OTP_VERIFICATION: '/auth/verify-otp',
@@ -13,15 +14,13 @@ export const PATHS = {
     ROOT: '/admin',
     OVERVIEW: '/admin',
     FARMERS: '/admin/farmers',
-    WARDS: {
-      MUNICIPALITIES: '/admin/wards/municipalities',
-      OFFICERS: '/admin/wards/officers',
-    },
     INSURANCE: {
       COMPANIES: '/admin/insurance/companies',
       OFFICERS: '/admin/insurance/officers',
     },
+    POLICIES: '/admin/policies',
     CLAIMS: '/admin/claims',
+    CLAIM_DETAIL: (id: string) => `/admin/claims/${id}`,
     FRAUD: '/admin/fraud',
     ANALYTICS: '/admin/analytics',
     NOTIFICATIONS: '/admin/notifications',
@@ -29,15 +28,26 @@ export const PATHS = {
     SETTINGS: '/admin/settings',
     PROFILE: '/admin/profile',
   },
-  DASHBOARD: {
-    FARMER: '/dashboard/farmer',
-
-    WARD: '/dashboard/ward',
-    INSURANCE: '/dashboard/insurance',
+  FARMER: {
+    ROOT: '/farmer',
+    OVERVIEW: '/farmer',
+    BROWSE: '/farmer/browse',
+    SUBMIT_CLAIM: '/farmer/submit-claim',
+    POLICIES: '/farmer/policies',
+    TRANSACTIONS: '/farmer/transactions',
+    SETTINGS: '/farmer/settings',
   },
-  CLAIMS: {
-    LIST: '/claims',
-    DETAILS: (id: string) => `/claims/${id}`,
-    CREATE: '/claims/new',
+  INSURANCE: {
+    ROOT: '/insurance',
+    OVERVIEW: '/insurance',
+    CLAIMS: '/insurance/claims',
+    FARMERS: '/insurance/farmers',
+    POLICIES: '/insurance/policies',
+    SETTINGS: '/insurance/settings',
+  },
+  DASHBOARD: {
+    FARMER: '/farmer',
+    INSURANCE: '/insurance',
+    ADMIN: '/admin',
   },
 } as const;

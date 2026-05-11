@@ -1,85 +1,32 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { SYSTEM_PROMPTS, EXTRACTION_PROMPT } from './ai.prompts.js';
-import dotenv from 'dotenv';
+import Groq from "groq-sdk";
+import { SYSTEM_GUIDE_PROMPT } from "./ai.prompts.js";
 
-dotenv.config();
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
-export class AIService {
-  static model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  static visionModel = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-  /**
-   * General chat completion for farmers
-   */
-  static async chatWithFarmer(history, message) {
-    const chat = this.model.startChat({
-      history: history,
-      systemInstruction: SYSTEM_PROMPTS.FARMER_CHATBOT,
-    });
-
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    return response.text();
-  }
-
-  /**
-   * Extract structured claim data from chat history
-   */
-  static async extractClaimData(history) {
-    const prompt = `${EXTRACTION_PROMPT}\n\nConversation history:\n${JSON.stringify(history)}`;
-    const result = await this.model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
+export const getAIResponse = async (history) => {
     try {
-      // Clean up potential markdown formatting in response
-      const jsonStr = text.replace(/```json|```/g, '').trim();
-      return JSON.parse(jsonStr);
-    } catch (e) {
-      console.error('Failed to parse claim data:', text);
-      return null;
+        const messages = [
+            { role: "system", content: SYSTEM_GUIDE_PROMPT },
+            ...history.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'assistant',
+                content: Array.isArray(msg.parts) ? msg.parts[0].text : msg.parts
+            }))
+        ];
+
+        const completion = await groq.chat.completions.create({
+            messages,
+            model: process.env.AI_MODEL || "llama-3.1-70b-versatile",
+            temperature: 0.7,
+            max_tokens: 1024,
+            top_p: 1,
+            stream: false,
+        });
+
+        return completion.choices[0]?.message?.content || "I'm sorry, I couldn't process that request.";
+    } catch (error) {
+        console.error("Groq AI Error:", error);
+        throw new Error("Failed to get response from AI Assistant");
     }
-  }
-
-  /**
-   * Analyze claim evidence (images)
-   */
-  static async analyzeEvidence(imageBuffer, mimeType) {
-    const prompt = SYSTEM_PROMPTS.INSURANCE_OFFICER_ASSISTANT + 
-      "\n\nPlease analyze this evidence photo and provide a risk assessment.";
-
-    const result = await this.visionModel.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType
-        }
-      }
-    ]);
-
-    const response = await result.response;
-    return response.text();
-  }
-
-  /**
-   * Generate claim summary for Ward/Insurance officers
-   */
-  static async generateSummary(claimData, role) {
-    const systemPrompt = role === 'ward' ? 
-      SYSTEM_PROMPTS.WARD_OFFICER_ASSISTANT : 
-      SYSTEM_PROMPTS.INSURANCE_OFFICER_ASSISTANT;
-
-    const prompt = `Claim Data:\n${JSON.stringify(claimData)}\n\nPlease provide a professional summary.`;
-    
-    const result = await this.model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      systemInstruction: systemPrompt
-    });
-
-    const response = await result.response;
-    return response.text();
-  }
-}
+};
