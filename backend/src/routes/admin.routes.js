@@ -2,6 +2,7 @@ import express from "express";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/roleAuth.middleware.js";
 import {
+  adminLogin,
   getPendingClaims,
   getAllClaims,
   verifyClaim,
@@ -11,6 +12,9 @@ import {
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
+
+// Public admin login
+router.post("/login", adminLogin);
 
 // All routes require admin role
 router.use(verifyJWT);

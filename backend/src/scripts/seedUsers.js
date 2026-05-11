@@ -19,6 +19,7 @@ const seedData = async () => {
     // 1. Create Admin
     const admin = await User.create({
       phoneNumber: "9999999999",
+      email: "admin@krishiyug.com",
       password: "admin12345",
       name: "System Admin",
       role: "admin",
@@ -159,6 +160,7 @@ const seedData = async () => {
 
     console.log("1. Admin:");
     console.log("   Phone: 9999999999");
+    console.log("   Email: admin@krishiyug.com");
     console.log("   Password: admin12345");
     console.log("   Access: Full system access\n");
 

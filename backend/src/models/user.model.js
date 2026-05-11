@@ -6,11 +6,20 @@ const userSchema = new mongoose.Schema(
   {
     phoneNumber: {
       type: String,
-      required: [true, "Phone number is required"],
-      unique: true,
+      required: function() { return this.role !== 'admin'; },
+      unique: false,
       trim: true,
       match: [/^[6-9]\d{9}$/, "Please provide a valid Indian phone number"],
       index: true,
+    },
+    email: {
+      type: String,
+      required: function() { return this.role === 'admin'; },
+      unique: true,
+      trim: true,
+      lowercase: true,
+      sparse: true,
+      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email address"],
     },
     password: {
       type: String,
@@ -71,6 +80,9 @@ userSchema.pre("save", async function () {
 
 // Validate role-specific fields
 userSchema.pre("save", async function () {
+  if (this.role === "admin" && !this.email) {
+    throw new Error("Email is required for admin users");
+  }
   if (this.role === "insurance_company" && !this.companyName) {
     throw new Error("Company name is required for insurance companies");
   }
@@ -91,6 +103,7 @@ userSchema.methods.generateAuthToken = function () {
       _id: this._id,
       role: this.role,
       phoneNumber: this.phoneNumber,
+      email: this.email,
     },
     process.env.JWT_SECRET,
     {
