@@ -50,12 +50,24 @@ export const register = asyncHandler(async (req, res) => {
   // Remove password from response
   const userResponse = user.toJSON();
 
+  // Determine redirect path based on role
+  const redirectPaths = {
+    farmer: "/farmer/dashboard",
+    admin: "/admin/dashboard",
+    insurance_company: "/insurance/dashboard",
+    ward_official: "/ward/dashboard",
+    insurance_agent: "/agent/dashboard",
+  };
+
+  const redirectTo = redirectPaths[user.role] || "/dashboard";
+
   res.status(201).json(
     new ApiResponse(
       201,
       {
         user: userResponse,
         token,
+        redirectTo,
       },
       "User registered successfully"
     )
@@ -97,14 +109,37 @@ export const login = asyncHandler(async (req, res) => {
   // Remove password from response
   const userResponse = user.toJSON();
 
+  // Determine redirect path based on role
+  const redirectPaths = {
+    farmer: "/farmer/dashboard",
+    admin: "/admin/dashboard",
+    insurance_company: "/insurance/dashboard",
+    ward_official: "/ward/dashboard",
+    insurance_agent: "/agent/dashboard",
+  };
+
+  const redirectTo = redirectPaths[user.role] || "/dashboard";
+
   res.status(200).json(
     new ApiResponse(
       200,
       {
         user: userResponse,
         token,
+        redirectTo,
       },
       "Login successful"
+    )
+  );
+});
+
+// Logout user
+export const logout = asyncHandler(async (req, res) => {
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      null,
+      "Logout successful"
     )
   );
 });
