@@ -9,8 +9,12 @@ import aiRoutes from './modules/ai/ai.routes.js';
 // Import routes
 import authRoutes from './routes/auth.routes.js';
 import farmerRoutes from './routes/farmer.routes.js';
-import wardRoutes from './routes/ward.routes.js';
 import insuranceRoutes from './routes/insurance.routes.js';
+import policyRoutes from './routes/policy.routes.js';
+
+import claimRoutes from './routes/claim.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 
 dotenv.config({
     path: './.env'
@@ -49,9 +53,11 @@ app.get('/api/v1', (req, res) => {
 // Mount authentication and protected routes
 app.use('/api/auth', authRoutes);
 app.use('/api/farmer', farmerRoutes);
-app.use('/api/ward', wardRoutes);
 app.use('/api/insurance', insuranceRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/policies', policyRoutes);
+app.use('/api/claims', claimRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 404 handler
 app.use((req, res) => {
