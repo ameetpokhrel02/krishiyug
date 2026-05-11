@@ -216,13 +216,13 @@ export const FarmerOverview = () => {
                       <p className={cn(
                         "text-[8px] font-black uppercase tracking-widest",
                         claim.status === 'refund_approved' ? "text-emerald-600" :
-                        claim.status === 'rejected' ? "text-red-500" :
-                        claim.status === 'admin_verified' ? "text-blue-600" :
-                        "text-amber-600"
+                          claim.status === 'rejected' ? "text-red-500" :
+                            claim.status === 'admin_verified' ? "text-blue-600" :
+                              "text-amber-600"
                       )}>
                         {claim.status === 'refund_approved' ? 'Approved' :
-                         claim.status === 'admin_verified' ? 'Under Review' :
-                         claim.status === 'pending' ? 'Pending' : claim.status}
+                          claim.status === 'admin_verified' ? 'Under Review' :
+                            claim.status === 'pending' ? 'Pending' : claim.status}
                       </p>
                     </div>
                   </div>

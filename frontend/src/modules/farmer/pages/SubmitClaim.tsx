@@ -50,7 +50,24 @@ export const FarmerSubmitClaim = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const f = e.target.files[0];
-    const isVideo = f.type.startsWith('video/');
+    const isVideo = f.type.startsWith('video/') || f.name.toLowerCase().endsWith('.mp4');
+    
+    // Size Validation
+    const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+    
+    if (isVideo) {
+      if (f.size > MAX_VIDEO_SIZE) {
+        toast.error('Video size exceeds 50MB limit.');
+        return;
+      }
+    } else {
+      if (f.size > MAX_IMAGE_SIZE) {
+        toast.error('Image size exceeds 5MB limit.');
+        return;
+      }
+    }
+
     setFiles(prev => [...prev, {
       id: Math.random().toString(36).substr(2, 9),
       file: f,
@@ -214,7 +231,11 @@ export const FarmerSubmitClaim = () => {
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex gap-3">
                 <Info className="w-5 h-5 text-emerald-600 shrink-0" />
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Include at least 2 clear photos of the damage. For livestock claims, ensure the official <b>ear tag is clearly visible</b>. Videos provide stronger evidence.
+                  Include at least 2 clear photos of the damage. For livestock claims, ensure the official <b>ear tag is clearly visible</b>. 
+                  <br />
+                  <span className="text-[10px] text-slate-400">
+                    Limits: Images max 5MB, Videos max 50MB (MP4).
+                  </span>
                 </p>
               </div>
             </motion.div>

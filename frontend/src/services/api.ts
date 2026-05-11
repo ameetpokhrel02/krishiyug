@@ -29,7 +29,7 @@ api.interceptors.response.use(
       try {
         const user = userStr ? JSON.parse(userStr) : null;
         if (user?.role === 'admin') redirectPath = '/auth/admin-login';
-      } catch (_) {}
+      } catch (_) { }
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       window.location.href = redirectPath;

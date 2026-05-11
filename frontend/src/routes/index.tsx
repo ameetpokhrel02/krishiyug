@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { PATHS } from './paths';
-import { RoleGuard, AuthGuard, PublicGuard, AdminLoginGuard } from './guards';
+import { RoleGuard, PublicGuard, AdminLoginGuard } from './guards';
 
 import LandingPage from '@/pages/LandingPage';
 
@@ -69,7 +69,7 @@ const router = createBrowserRouter([
       { path: PATHS.AUTH.ADMIN_LOGIN, element: <AdminLoginPage /> },
     ]
   },
-  
+
   // ──────────────────────────────────────────────
   // Admin Dashboard Routes
   // ──────────────────────────────────────────────
