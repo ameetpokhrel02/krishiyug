@@ -209,6 +209,54 @@ Base URL: `http://localhost:3000`
 }
 ```
 
+### GET /api/admin/insurance-companies
+- Description: Get all insurance companies.
+
+### User Management Endpoints
+
+#### GET /api/admin/users
+- Description: Get all users with optional role filter.
+- Query: `?role=farmer` (optional)
+
+#### GET /api/admin/users/:id
+- Description: Get specific user by ID.
+
+#### POST /api/admin/provision-user
+- Description: Create internal user accounts (ward officials, insurance partners, admins).
+- Body: JSON
+
+```json
+{
+  "name": "John Doe",
+  "phoneNumber": "9841234567",
+  "email": "john@example.com",
+  "role": "ward_official",
+  "companyName": "Ward 07",
+  "password": "CustomPassword123!"
+}
+```
+
+Note: Password is optional, defaults to "Krishiyug@123"
+
+#### PUT /api/admin/users/:id
+- Description: Update user details.
+- Body: JSON
+
+```json
+{
+  "name": "Updated Name",
+  "phoneNumber": "9841234567",
+  "email": "newemail@example.com",
+  "companyName": "New Company"
+}
+```
+
+#### PATCH /api/admin/users/:id/toggle-status
+- Description: Toggle user status between active and inactive.
+
+#### DELETE /api/admin/users/:id
+- Description: Delete a user (cannot delete admin users).
+
 ---
 
 ## 7. Policy endpoints

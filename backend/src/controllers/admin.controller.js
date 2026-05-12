@@ -236,7 +236,7 @@ export const createInsuranceCompany = asyncHandler(async (req, res) => {
 // Admin lists all insurance companies
 export const getInsuranceCompanies = asyncHandler(async (req, res) => {
   const companies = await User.find({ role: "insurance_company" })
-    .select("name companyName phoneNumber createdAt")
+    .select("name companyName phoneNumber status createdAt")
     .sort("-createdAt");
 
   res.status(200).json(
@@ -325,5 +325,109 @@ export const provisionUser = asyncHandler(async (req, res) => {
 
   res.status(201).json(
     new ApiResponse(201, response, `User with role ${role} provisioned successfully`)
+  );
+});
+
+// Admin gets a specific user by ID
+export const getUserById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, user, "User retrieved successfully")
+  );
+});
+
+// Admin updates a user
+export const updateUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, phoneNumber, email, companyName, wardNumber } = req.body;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Check if phone number is being changed and if it's already taken
+  if (phoneNumber && phoneNumber !== user.phoneNumber) {
+    const existingPhone = await User.findOne({ phoneNumber });
+    if (existingPhone) {
+      throw new ApiError(409, "Phone number already in use");
+    }
+    user.phoneNumber = phoneNumber;
+  }
+
+  // Check if email is being changed and if it's already taken
+  if (email && email !== user.email) {
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      throw new ApiError(409, "Email already in use");
+    }
+    user.email = email;
+  }
+
+  if (name) user.name = name;
+  if (companyName) user.companyName = companyName;
+  if (wardNumber) user.wardNumber = wardNumber;
+
+  await user.save();
+
+  const response = user.toJSON();
+
+  res.status(200).json(
+    new ApiResponse(200, response, "User updated successfully")
+  );
+});
+
+// Admin toggles user active status
+export const toggleUserStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Toggle between active and inactive
+  user.status = user.status === "active" ? "inactive" : "active";
+  await user.save();
+
+  const response = user.toJSON();
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      response,
+      `User ${user.status === "active" ? "activated" : "deactivated"} successfully`
+    )
+  );
+});
+
+// Admin deletes a user
+export const deleteUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Prevent deleting admin users
+  if (user.role === "admin") {
+    throw new ApiError(403, "Cannot delete admin users");
+  }
+
+  await User.findByIdAndDelete(id);
+
+  res.status(200).json(
+    new ApiResponse(200, null, "User deleted successfully")
   );
 });

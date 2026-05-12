@@ -24,16 +24,18 @@ interface DataTableProps {
   onAdd?: () => void;
   isLoading?: boolean;
   searchPlaceholder?: string;
+  actions?: (row: any) => React.ReactNode;
 }
 
-export const AdminDataTable = ({ 
-  title, 
-  description, 
-  columns, 
-  data, 
-  onAdd, 
+export const AdminDataTable = ({
+  title,
+  description,
+  columns,
+  data,
+  onAdd,
   isLoading,
-  searchPlaceholder = "Search platform records..."
+  searchPlaceholder = "Search platform records...",
+  actions
 }: DataTableProps) => {
   return (
     <div className="space-y-6">
@@ -79,7 +81,7 @@ export const AdminDataTable = ({
                     </div>
                   </th>
                 ))}
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                {actions && <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -91,7 +93,7 @@ export const AdminDataTable = ({
                         <div className="h-4 bg-slate-100 rounded-lg w-full" />
                       </td>
                     ))}
-                    <td className="px-8 py-6"><div className="h-4 bg-slate-100 rounded-lg w-8 ml-auto" /></td>
+                    {actions && <td className="px-8 py-6"><div className="h-4 bg-slate-100 rounded-lg w-8 ml-auto" /></td>}
                   </tr>
                 ))
               ) : data.length === 0 ? (
@@ -111,11 +113,11 @@ export const AdminDataTable = ({
                         {col.cell ? col.cell(row) : row[col.accessorKey]}
                       </td>
                     ))}
-                    <td className="px-8 py-6 text-right">
-                      <button className="p-2.5 rounded-xl hover:bg-white hover:shadow-lg text-slate-400 hover:text-indigo-600 transition-all">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </td>
+                    {actions && (
+                      <td className="px-8 py-6 text-right">
+                        {actions(row)}
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

@@ -16,7 +16,8 @@ const seedData = async () => {
     await Policy.deleteMany({});
     console.log("Cleared existing data");
 
-    // 1. Create Admin
+   
+ // 1. Create Admin
     const admin = await User.create({
       phoneNumber: "9999999999",
       email: "admin@krishiyug.com",
@@ -24,6 +25,8 @@ const seedData = async () => {
       name: "System Admin",
       role: "admin",
     });
+       
+    
     console.log(`✓ Created Admin: ${admin.name} (${admin.phoneNumber})`);
 
     // 2. Create Insurance Companies

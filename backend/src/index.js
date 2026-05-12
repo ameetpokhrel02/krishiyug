@@ -16,6 +16,7 @@ import policyRoutes from './routes/policy.routes.js';
 import claimRoutes from './routes/claim.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import locationRoutes from './routes/location.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,7 +71,7 @@ app.get('/api/v1', (req, res) => {
     });
 });
 
-// Mount authentication and protected routes
+// Mount protected routes
 app.use('/api/auth', authRoutes);
 app.use('/api/farmer', farmerRoutes);
 app.use('/api/insurance', insuranceRoutes);
@@ -78,6 +79,7 @@ app.use('/api/policies', policyRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiRoutes);
 
 // 404 handler

@@ -134,6 +134,12 @@ export const insuranceAPI = {
 // POST /api/admin/claims/verify → { claimId, remarks? }
 // POST /api/admin/claims/reject → { claimId, reason? }
 // POST /api/admin/insurance-company → { name, phoneNumber, password, companyName }
+// User Management
+// GET  /api/admin/users → all users (optional role filter)
+// GET  /api/admin/users/:id → specific user
+// PUT  /api/admin/users/:id → update user
+// PATCH /api/admin/users/:id/toggle-status → toggle active/inactive
+// DELETE /api/admin/users/:id → delete user
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
   getPendingClaims: () => api.get('/admin/claims/pending'),
@@ -146,7 +152,14 @@ export const adminAPI = {
   createInsuranceCompany: (data: { name: string; phoneNumber: string; password: string; companyName: string }) =>
     api.post('/admin/insurance-company', data),
   getInsuranceCompanies: () => api.get('/admin/insurance-companies'),
+
+  // User Management
   getUsers: (role?: string) => api.get('/admin/users', { params: role ? { role: role.toLowerCase() } : {} }),
+  getUserById: (id: string) => api.get(`/admin/users/${id}`),
+  updateUser: (id: string, data: { name?: string; phoneNumber?: string; email?: string; companyName?: string; wardNumber?: string }) =>
+    api.put(`/admin/users/${id}`, data),
+  toggleUserStatus: (id: string) => api.patch(`/admin/users/${id}/toggle-status`),
+  deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
   provisionUser: (data: any) => api.post('/admin/provision-user', data),
 };
 
