@@ -102,5 +102,6 @@ export const policyCreationSchema = z.object({
   }),
   applicableRegions: z.array(z.string()).optional(),
   insuranceCompanyId: z.string().min(1, "Insurance company ID is required"),
+  isActive: z.boolean().optional(),
 });
 

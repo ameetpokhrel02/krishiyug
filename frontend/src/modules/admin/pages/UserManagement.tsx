@@ -1,17 +1,11 @@
 import { useState, useEffect } from 'react';
 import { AdminDataTable } from '../components/DataTable';
 import { cn } from '@/lib/utils';
-import { UserPlus, Loader2, X, Phone, User, Mail, Shield, Building2, Lock, Edit2, Trash2, Power, MoreVertical } from 'lucide-react';
+import { UserPlus, Loader2, X, Phone, User, Mail, Shield, Building2, Lock, Edit2, Trash2, Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { adminAPI } from '@/services/api';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 export const AdminUserManagement = () => {
   const [activeRole, setActiveRole] = useState<string>('farmer');
@@ -246,38 +240,42 @@ export const AdminUserManagement = () => {
           columns={columns}
           data={users}
           actions={(u: any) => (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-slate-100 rounded-xl">
-                  <MoreVertical className="h-4 w-4 text-slate-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-2xl border-slate-200 shadow-xl">
-                <DropdownMenuItem
-                  onClick={() => handleEdit(u)}
-                  className="cursor-pointer rounded-xl text-sm font-semibold"
-                >
-                  <Edit2 className="mr-2 h-4 w-4 text-indigo-600" />
-                  Edit User
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleToggleStatus(u)}
-                  className="cursor-pointer rounded-xl text-sm font-semibold"
-                >
-                  <Power className={cn("mr-2 h-4 w-4", u.status === 'active' ? 'text-orange-600' : 'text-emerald-600')} />
-                  {u.status === 'active' ? 'Deactivate' : 'Activate'}
-                </DropdownMenuItem>
-                {u.role !== 'admin' && (
-                  <DropdownMenuItem
-                    onClick={() => handleDelete(u)}
-                    className="cursor-pointer rounded-xl text-sm font-semibold text-red-600 focus:text-red-600"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete User
-                  </DropdownMenuItem>
+            <div className="flex items-center justify-end gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleEdit(u)}
+                className="h-9 rounded-xl border-slate-200 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-indigo-700 hover:bg-indigo-50"
+              >
+                <Edit2 className="mr-1.5 h-3.5 w-3.5" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleToggleStatus(u)}
+                className={cn(
+                  "h-9 rounded-xl border-slate-200 bg-white px-3 text-[10px] font-black uppercase tracking-widest",
+                  u.status === 'active'
+                    ? 'text-amber-700 hover:bg-amber-50'
+                    : 'text-emerald-700 hover:bg-emerald-50'
                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              >
+                <Power className="mr-1.5 h-3.5 w-3.5" />
+                {u.status === 'active' ? 'Deactivate' : 'Activate'}
+              </Button>
+              {u.role !== 'admin' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleDelete(u)}
+                  className="h-9 rounded-xl border-red-200 bg-white px-3 text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  Delete
+                </Button>
+              )}
+            </div>
           )}
         />
       )}

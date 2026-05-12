@@ -16,12 +16,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
+
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
     delete config.headers['content-type'];
   }
-  
+
   return config;
 });
 
@@ -146,6 +146,12 @@ export const insuranceAPI = {
 // PUT  /api/admin/users/:id → update user
 // PATCH /api/admin/users/:id/toggle-status → toggle active/inactive
 // DELETE /api/admin/users/:id → delete user
+// Policy Registry
+// POST /api/policies → create policy
+// GET  /api/policies/all → all policies for admin
+// PUT  /api/policies/:id → update policy
+// PATCH /api/policies/:id/toggle → activate/deactivate
+// DELETE /api/policies/:id → delete policy
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
   getPendingClaims: () => api.get('/admin/claims/pending'),
@@ -167,6 +173,11 @@ export const adminAPI = {
   toggleUserStatus: (id: string) => api.patch(`/admin/users/${id}/toggle-status`),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
   provisionUser: (data: any) => api.post('/admin/provision-user', data),
+
+  // Policy Applications
+  getPolicyApplications: (status?: string) => api.get('/admin/policy-applications', { params: status ? { status } : {} }),
+  verifyPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/verify`, { remarks }),
+  rejectPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/reject`, { remarks }),
 };
 
 // ==================== LOCATION ====================

@@ -21,6 +21,8 @@ export const FarmerVoiceAssistant = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   
+  const [language, setLanguage] = useState<'ne-NP' | 'en-US'>('ne-NP');
+  
   // Browser Speech Recognition
   const recognitionRef = useRef<any>(null);
 
@@ -28,43 +30,80 @@ export const FarmerVoiceAssistant = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
+      recognitionRef.current.continuous = false; // Stop automatically when user finishes speaking
       recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
-
+      
       recognitionRef.current.onresult = (event: any) => {
         let currentTranscript = '';
+        let isFinal = false;
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           currentTranscript += event.results[i][0].transcript;
+          if (event.results[i].isFinal) isFinal = true;
         }
         setTranscript(currentTranscript);
+        
+        if (isFinal) {
+           setIsListening(false);
+           handleProcessVoice(currentTranscript);
+        }
       };
 
-      recognitionRef.current.onerror = () => {
+      recognitionRef.current.onerror = (event: any) => {
         setIsListening(false);
-        toast.error('Voice recognition error. Please try again.');
+        if (event.error === 'no-speech') {
+           toast.error('No voice detected. Please try again.');
+        } else {
+           toast.error('Voice recognition error or not supported on this browser.');
+        }
       };
+
+      recognitionRef.current.onend = () => {
+         setIsListening(false);
+      };
+    } else {
+      toast.error('Voice recognition is not supported in your browser. Please use Chrome.');
     }
   }, []);
 
+  // Update language when changed
+  useEffect(() => {
+     if (recognitionRef.current) {
+        recognitionRef.current.lang = language;
+     }
+  }, [language]);
+
   const toggleListening = () => {
+    if (!recognitionRef.current) {
+       toast.error('Voice recognition not supported.');
+       return;
+    }
+    
     if (isListening) {
-      recognitionRef.current?.stop();
+      recognitionRef.current.stop();
       setIsListening(false);
-      if (transcript.length > 5) handleProcessVoice();
     } else {
       setTranscript('');
       setAiResponse(null);
-      recognitionRef.current?.start();
-      setIsListening(true);
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        // Handle cases where it's already started
+        recognitionRef.current.stop();
+        setTimeout(() => recognitionRef.current.start(), 100);
+      }
     }
   };
 
-  const handleProcessVoice = async () => {
+  const handleProcessVoice = async (textToProcess: string = transcript) => {
+    if (!textToProcess || textToProcess.trim().length < 2) return;
     setIsProcessing(true);
     try {
-      // Use the voice-claim or chat endpoint
-      const response: any = await aiAPI.chat([{ role: 'user', content: `[Voice Transcript]: ${transcript}` }]);
+      // Use the chat endpoint with context
+      const response: any = await aiAPI.chat([{ 
+        role: 'user', 
+        content: `[Farmer Voice Request (${language})]: ${textToProcess}. Please respond warmly and guide me step-by-step.` 
+      }]);
       setAiResponse(response?.data?.reply || "I've processed your voice request. How else can I help?");
       toast.success('Voice command processed');
     } catch (err) {
