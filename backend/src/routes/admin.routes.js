@@ -12,32 +12,38 @@ import {
   getInsuranceCompanies,
   getUsers,
   provisionUser,
+  getUserById,
+  updateUser,
+  toggleUserStatus,
+  deleteUser,
 } from "../controllers/admin.controller.js";
+
+console.log("[DEBUG] Loading Admin Routes...");
 
 const router = express.Router();
 
 // Public admin login
 router.post("/login", adminLogin);
 
-// All routes require admin role
-router.use(verifyJWT);
-router.use(authorizeRoles("admin"));
-
 // Dashboard
-router.get("/dashboard/stats", getDashboardStats);
-
-// Claim management
-router.get("/claims/pending", getPendingClaims);
-router.get("/claims/all", getAllClaims);
-router.post("/claims/verify", verifyClaim);
-router.post("/claims/reject", rejectClaim);
-
-// Insurance company management
-router.post("/insurance-company", createInsuranceCompany);
-router.get("/insurance-companies", getInsuranceCompanies);
+router.get("/dashboard/stats", verifyJWT, authorizeRoles("admin"), getDashboardStats);
 
 // User management
-router.get("/users", getUsers);
-router.post("/provision-user", provisionUser);
+router.get("/users", verifyJWT, authorizeRoles("admin"), getUsers);
+router.post("/provision-user", verifyJWT, authorizeRoles("admin"), provisionUser);
+router.get("/users/:id", verifyJWT, authorizeRoles("admin"), getUserById);
+router.put("/users/:id", verifyJWT, authorizeRoles("admin"), updateUser);
+router.patch("/users/:id/toggle-status", verifyJWT, authorizeRoles("admin"), toggleUserStatus);
+router.delete("/users/:id", verifyJWT, authorizeRoles("admin"), deleteUser);
+
+// Claim management
+router.get("/claims/pending", verifyJWT, authorizeRoles("admin"), getPendingClaims);
+router.get("/claims/all", verifyJWT, authorizeRoles("admin"), getAllClaims);
+router.post("/claims/verify", verifyJWT, authorizeRoles("admin"), verifyClaim);
+router.post("/claims/reject", verifyJWT, authorizeRoles("admin"), rejectClaim);
+
+// Insurance company management
+router.post("/insurance-company", verifyJWT, authorizeRoles("admin"), createInsuranceCompany);
+router.get("/insurance-companies", verifyJWT, authorizeRoles("admin"), getInsuranceCompanies);
 
 export default router;

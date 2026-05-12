@@ -37,9 +37,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Role is required"],
       enum: {
-        values: ["farmer", "insurance_company", "admin"],
-        message: "Role must be farmer, insurance_company, or admin",
+        values: ["farmer", "insurance_company", "admin", "ward_official", "insurance_agent"],
+        message: "Role must be farmer, insurance_company, admin, ward_official, or insurance_agent",
       },
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive", "suspended"],
+      default: "active",
     },
     // Role-specific fields
     companyName: {

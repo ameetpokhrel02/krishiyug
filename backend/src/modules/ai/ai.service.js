@@ -1,12 +1,25 @@
 import Groq from "groq-sdk";
 import { SYSTEM_GUIDE_PROMPT } from "./ai.prompts.js";
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
+let groq;
+
+const getGroqClient = () => {
+    if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY is not configured. Set it in your .env file or remove AI route usage.");
+    }
+
+    if (!groq) {
+        groq = new Groq({
+            apiKey: process.env.GROQ_API_KEY,
+        });
+    }
+
+    return groq;
+};
 
 export const getAIResponse = async (history) => {
     try {
+        const groqClient = getGroqClient();
         const messages = [
             { role: "system", content: SYSTEM_GUIDE_PROMPT },
             ...history.map(msg => ({
@@ -15,7 +28,7 @@ export const getAIResponse = async (history) => {
             }))
         ];
 
-        const completion = await groq.chat.completions.create({
+        const completion = await groqClient.chat.completions.create({
             messages,
             model: process.env.AI_MODEL || "llama-3.1-70b-versatile",
             temperature: 0.7,
