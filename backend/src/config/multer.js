@@ -38,9 +38,23 @@ export const uploadClaimMedia = upload.fields([
   { name: "video", maxCount: 1 },
 ]);
 
+<<<<<<< HEAD
 // For policy application submission
 export const uploadApplicationMedia = upload.fields([
   { name: "documentImage", maxCount: 1 },
   { name: "lalpurjaImage", maxCount: 1 },
   { name: "citizenshipImage", maxCount: 1 }
 ]);
+=======
+// For profile photo upload: only image, max 2MB
+export const uploadProfilePhoto = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+}).single("photo");
+>>>>>>> fb67f51732b8590139f5668c3672eeb9407504f4

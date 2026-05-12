@@ -16,6 +16,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+    delete config.headers['content-type'];
+  }
+
   return config;
 });
 
@@ -197,6 +203,14 @@ export const notificationAPI = {
   getAll: () => api.get('/notifications'),
   getUnread: () => api.get('/notifications/unread'),
   markAsRead: (id: string) => api.put(`/notifications/${id}/read`),
+};
+
+// ==================== PROFILE ====================
+// GET /api/profile  → current authenticated user
+// PATCH /api/profile → update profile fields and photo
+export const profileAPI = {
+  getProfile: () => api.get('/profile'),
+  updateProfile: (data: FormData) => api.patch('/profile', data),
 };
 
 export default api;
