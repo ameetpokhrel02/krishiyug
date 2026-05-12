@@ -121,25 +121,23 @@ export const getAllPolicies = asyncHandler(async (req, res) => {
 export const getRecommendedPolicies = asyncHandler(async (req, res) => {
   const farmer = req.user;
 
-  if (!farmer.farmerDetails) {
-    throw new ApiError(400, "Farmer profile incomplete. Please update your details.");
-  }
-
   let filter = { isActive: true };
 
-  // Match farm type
-  if (farmer.farmerDetails.farmType === "livestock") {
-    filter.policyType = "livestock";
-  } else if (farmer.farmerDetails.farmType === "crop") {
-    filter.policyType = { $in: ["crop", "weather"] };
-  }
+  if (farmer.farmerDetails) {
+    // Match farm type
+    if (farmer.farmerDetails.farmType === "livestock") {
+      filter.policyType = "livestock";
+    } else if (farmer.farmerDetails.farmType === "crop") {
+      filter.policyType = { $in: ["crop", "weather"] };
+    }
 
-  // Match region if available
-  if (farmer.farmerDetails.location?.region) {
-    filter.$or = [
-      { applicableRegions: { $in: [farmer.farmerDetails.location.region] } },
-      { applicableRegions: { $size: 0 } }, // Policies with no region restrictions
-    ];
+    // Match region if available
+    if (farmer.farmerDetails.location?.region) {
+      filter.$or = [
+        { applicableRegions: { $in: [farmer.farmerDetails.location.region] } },
+        { applicableRegions: { $size: 0 } }, // Policies with no region restrictions
+      ];
+    }
   }
 
   const policies = await Policy.find(filter).populate(
@@ -152,10 +150,10 @@ export const getRecommendedPolicies = asyncHandler(async (req, res) => {
       200,
       {
         policies,
-        farmerProfile: {
+        farmerProfile: farmer.farmerDetails ? {
           farmType: farmer.farmerDetails.farmType,
           region: farmer.farmerDetails.location?.region,
-        },
+        } : null,
       },
       "Recommended policies retrieved successfully"
     )

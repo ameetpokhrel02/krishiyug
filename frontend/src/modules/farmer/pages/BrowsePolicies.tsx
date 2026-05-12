@@ -318,7 +318,7 @@ export const FarmerBrowsePolicies = () => {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col"
           >
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <div>
@@ -330,7 +330,8 @@ export const FarmerBrowsePolicies = () => {
               </button>
             </div>
             
-            <form onSubmit={submitApplication} className="p-6 space-y-4">
+            <form onSubmit={submitApplication} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Farm Size (Acres/Ropani)</label>
                 <input
@@ -509,11 +510,13 @@ export const FarmerBrowsePolicies = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex gap-3">
-                <Button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl">
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+                <Button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl py-6">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={buying === selectedPolicy._id} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-200">
+                <Button type="submit" disabled={buying === selectedPolicy._id} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-200 py-6">
                   {buying === selectedPolicy._id ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Application'}
                 </Button>
               </div>
