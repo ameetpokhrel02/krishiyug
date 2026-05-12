@@ -29,7 +29,7 @@ api.interceptors.response.use(
       try {
         const user = userStr ? JSON.parse(userStr) : null;
         if (user?.role === 'admin') redirectPath = '/auth/admin-login';
-      } catch (_) {}
+      } catch (_) { }
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       window.location.href = redirectPath;
@@ -52,7 +52,7 @@ export const authAPI = {
       farmType: 'livestock' | 'crop';
       farmSize: number;
       cropTypes?: string[];
-      location: { district: string; village: string; region?: string; palika?: string };
+      location: { district: string; village: string; region?: string; palika?: string; ward?: string; lat?: number; lng?: number };
       livestockDetails?: { earTags: string[] };
     };
     companyName?: string;
@@ -89,7 +89,7 @@ export const claimAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
 
-  getMyClaims: () => api.get('/claims/user/my-claims'),
+  getMyClaims: () => api.get('/claims/my-claims'),
 
   getClaimStatus: (claimId: string) =>
     api.get(`/claims/${claimId}/status`),

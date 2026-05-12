@@ -62,8 +62,12 @@ const userSchema = new mongoose.Schema(
       },
       cropTypes: [String],
       location: {
-        district: String,
-        village: String,
+        district: { type: String, required: true },
+        village: { type: String, required: true },
+        palika: { type: String },
+        ward: { type: String, required: true },
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
         region: String,
       },
       livestockDetails: {

@@ -9,18 +9,22 @@ import {
   Bell,
   Menu,
   CreditCard,
-  Leaf
+  Leaf,
+  Mic
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { PATHS } from '@/routes/paths';
 import { LogoutDialog } from '@/components/shared/LogoutDialog';
+import { AIChatbot } from '@/components/chatbot/ai-chatbot';
 
 const navItems = [
-  { icon: Home, label: 'Overview', path: '/farmer' },
-  { icon: ShieldCheck, label: 'Buy Insurance', path: '/farmer/browse' },
-  { icon: FileText, label: 'Submit Claim', path: '/farmer/submit-claim' },
-  { icon: History, label: 'My Policies', path: '/farmer/policies' },
-  { icon: CreditCard, label: 'Transactions', path: '/farmer/transactions' },
+  { icon: Home, label: 'Overview', path: PATHS.FARMER.OVERVIEW },
+  { icon: ShieldCheck, label: 'Buy Insurance', path: PATHS.FARMER.BROWSE },
+  { icon: Mic, label: 'AI Voice Assistant', path: PATHS.FARMER.VOICE_ASSISTANT },
+  { icon: FileText, label: 'Submit Claim', path: PATHS.FARMER.SUBMIT_CLAIM },
+  { icon: History, label: 'My Policies', path: PATHS.FARMER.POLICIES },
+  { icon: CreditCard, label: 'Transactions', path: PATHS.FARMER.TRANSACTIONS },
 ];
 
 export const FarmerLayout = () => {
@@ -131,6 +135,7 @@ export const FarmerLayout = () => {
         )}
       </AnimatePresence>
 
+      <AIChatbot />
       <LogoutDialog open={showLogout} onClose={() => setShowLogout(false)} theme="emerald" />
     </div>
   );

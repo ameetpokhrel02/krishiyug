@@ -1,4 +1,4 @@
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { UserPlus, Search, ShieldCheck, Zap, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRef } from 'react';

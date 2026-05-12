@@ -17,6 +17,8 @@ export const RegisterPage = () => {
     district: '',
     palika: '',
     wardNumber: '',
+    lat: 0,
+    lng: 0,
   });
   const handleDetectLocation = () => {
     if (!navigator.geolocation) {
@@ -29,6 +31,9 @@ export const RegisterPage = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          // Save coords in form state for server-side validation and tracking
+          setFormData(prev => ({ ...prev, lat: latitude, lng: longitude }));
+
           const response: any = await locationAPI.reverseGeocode(latitude, longitude);
 
           if (response?.success || response?.data) {
@@ -83,12 +88,18 @@ export const RegisterPage = () => {
         password: formData.password,
         role: 'farmer',
         farmerDetails: {
+          farmType: (formData as any).farmType || undefined,
+          farmSize: (formData as any).farmSize || undefined,
           location: {
             district: formData.district,
-            palika: formData.palika,
-            ward: formData.wardNumber || ''
-          }
-        }
+            village: formData.palika || '',
+            palika: formData.palika || '',
+            ward: formData.wardNumber || '',
+            lat: (formData as any).lat || 0,
+            lng: (formData as any).lng || 0,
+          },
+          cropTypes: (formData as any).cropTypes || undefined,
+        },
       });
 
       // Response structure: { data: { statusCode, success, message, data: { user, token, redirectTo } } }

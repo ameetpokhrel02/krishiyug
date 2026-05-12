@@ -24,7 +24,7 @@ export const getAIResponse = async (history) => {
             { role: "system", content: SYSTEM_GUIDE_PROMPT },
             ...history.map(msg => ({
                 role: msg.role === 'user' ? 'user' : 'assistant',
-                content: Array.isArray(msg.parts) ? msg.parts[0].text : msg.parts
+                content: typeof msg.content === 'string' ? msg.content : (Array.isArray(msg.parts) ? msg.parts[0].text : String(msg.content || ''))
             }))
         ];
 
@@ -40,6 +40,6 @@ export const getAIResponse = async (history) => {
         return completion.choices[0]?.message?.content || "I'm sorry, I couldn't process that request.";
     } catch (error) {
         console.error("Groq AI Error:", error);
-        throw new Error("Failed to get response from AI Assistant");
+        throw new Error(error.message || "Failed to get response from AI Assistant");
     }
 };

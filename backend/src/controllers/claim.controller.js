@@ -4,6 +4,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Claim from "../models/claim.model.js";
 import Policy from "../models/policy.model.js";
 import Notification from "../models/notification.model.js";
+import User from "../models/user.model.js";
 import cloudinary from "../config/cloudinary.js";
 
 // Helper function to upload buffer to Cloudinary
@@ -45,6 +46,20 @@ export const submitClaim = asyncHandler(async (req, res) => {
 
   if (images.length === 0 && !video) {
     throw new ApiError(400, "At least one image or video is required as evidence");
+  }
+
+  // Validate individual file sizes
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB
+
+  for (const img of images) {
+    if (img.size > MAX_IMAGE_SIZE) {
+      throw new ApiError(400, `Image ${img.originalname} exceeds the 5MB limit`);
+    }
+  }
+
+  if (video && video.size > MAX_VIDEO_SIZE) {
+    throw new ApiError(400, `Video exceeds the 50MB limit`);
   }
 
   // Upload images to Cloudinary

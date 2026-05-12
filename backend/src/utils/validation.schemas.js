@@ -25,6 +25,10 @@ export const registerSchema = z
         location: z.object({
           district: z.string().min(1, "District is required"),
           village: z.string().min(1, "Village is required"),
+          palika: z.string().optional(),
+          ward: z.string().min(1, "Ward is required"),
+          lat: z.number().finite({ message: "Latitude is required and must be a number" }),
+          lng: z.number().finite({ message: "Longitude is required and must be a number" }),
           region: z.string().optional(),
         }),
         livestockDetails: z
@@ -39,6 +43,11 @@ export const registerSchema = z
     (data) => {
       if (data.role === "insurance_company" && !data.companyName) return false;
       if (data.role === "farmer" && !data.farmerDetails) return false;
+      // If farmer, ensure location coordinates and ward exist
+      if (data.role === "farmer" && data.farmerDetails) {
+        const loc = data.farmerDetails.location;
+        if (!loc || typeof loc.lat !== 'number' || typeof loc.lng !== 'number' || !loc.ward) return false;
+      }
       return true;
     },
     {
