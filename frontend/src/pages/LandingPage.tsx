@@ -17,6 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import axios from 'axios';
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
 import { WhyChooseSection } from '@/components/landing/WhyChooseSection';
+import { AIChatbot } from '@/components/chatbot/ai-chatbot';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
@@ -225,6 +226,9 @@ export default function LandingPage() {
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2024 DIGITAL TRUST NETWORK.</p>
         </div>
       </footer>
+
+      {/* Global AI Chatbot for Landing Page Guidance */}
+      <AIChatbot />
     </div>
   );
 }
