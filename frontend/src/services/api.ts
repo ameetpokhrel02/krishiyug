@@ -16,12 +16,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
+  
   if (config.data instanceof FormData) {
     delete config.headers['Content-Type'];
     delete config.headers['content-type'];
   }
-
+  
   return config;
 });
 
@@ -112,7 +112,7 @@ export const policyAPI = {
   getAll: () => api.get('/policies/all'),
   getRecommended: () => api.get('/policies/recommended'),
   getById: (id: string) => api.get(`/policies/${id}`),
-  buy: (data: FormData) => api.post('/policies/buy', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  buy: (data: FormData) => api.post('/policies/buy', data),
 };
 
 // ==================== INSURANCE ====================
@@ -167,11 +167,6 @@ export const adminAPI = {
   toggleUserStatus: (id: string) => api.patch(`/admin/users/${id}/toggle-status`),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
   provisionUser: (data: any) => api.post('/admin/provision-user', data),
-
-  // Policy Applications
-  getPolicyApplications: (status?: string) => api.get('/admin/policy-applications', { params: status ? { status } : {} }),
-  verifyPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/verify`, { remarks }),
-  rejectPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/reject`, { remarks }),
 };
 
 // ==================== LOCATION ====================
@@ -206,8 +201,6 @@ export const notificationAPI = {
 };
 
 // ==================== PROFILE ====================
-// GET /api/profile  → current authenticated user
-// PATCH /api/profile → update profile fields and photo
 export const profileAPI = {
   getProfile: () => api.get('/profile'),
   updateProfile: (data: FormData) => api.patch('/profile', data),
