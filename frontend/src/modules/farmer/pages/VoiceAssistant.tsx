@@ -95,6 +95,19 @@ export const FarmerVoiceAssistant = () => {
     }
   };
 
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language;
+      // Optional: adjust rate and pitch for a more natural voice
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
   const handleProcessVoice = async (textToProcess: string = transcript) => {
     if (!textToProcess || textToProcess.trim().length < 2) return;
     setIsProcessing(true);
@@ -104,7 +117,10 @@ export const FarmerVoiceAssistant = () => {
         role: 'user', 
         content: `[Farmer Voice Request (${language})]: ${textToProcess}. Please respond warmly and guide me step-by-step.` 
       }]);
-      setAiResponse(response?.data?.reply || "I've processed your voice request. How else can I help?");
+      
+      const replyText = response?.data?.reply || "I've processed your voice request. How else can I help?";
+      setAiResponse(replyText);
+      speakText(replyText);
       toast.success('Voice command processed');
     } catch (err) {
       toast.error('Failed to process voice command');
