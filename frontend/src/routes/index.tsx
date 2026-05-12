@@ -40,6 +40,8 @@ import { InsuranceOverview } from '@/modules/insurance/pages/Overview';
 import { InsuranceClaimsRegistry } from '@/modules/insurance/pages/ClaimsRegistry';
 import { InsuredFarmers } from '@/modules/insurance/pages/InsuredFarmers';
 import { ActivePolicies } from '@/modules/insurance/pages/ActivePolicies';
+import ProfilePage from '../pages/ProfilePage';
+import ProfileRedirect from '../pages/ProfileRedirect';
 
 const router = createBrowserRouter([
   {
@@ -89,6 +91,7 @@ const router = createBrowserRouter([
           { path: 'fraud', element: <FraudMonitoring /> },
           { path: 'audit-logs', element: <AuditLogs /> },
           { path: 'settings', element: <AdminSettings /> },
+          { path: 'profile', element: <ProfilePage /> },
         ],
       },
     ],
@@ -108,6 +111,7 @@ const router = createBrowserRouter([
           { path: 'browse', element: <FarmerBrowsePolicies /> },
           { path: 'submit-claim', element: <FarmerSubmitClaim /> },
           { path: 'voice-assistant', element: <FarmerVoiceAssistant /> },
+          { path: 'profile', element: <ProfilePage /> },
           { path: 'policies', element: <div className="p-8"><h1 className="text-2xl font-bold text-slate-900">My Policies</h1><p className="mt-2 text-slate-500">History coming soon.</p></div> },
         ],
       },
@@ -128,9 +132,16 @@ const router = createBrowserRouter([
           { path: 'claims', element: <InsuranceClaimsRegistry /> },
           { path: 'farmers', element: <InsuredFarmers /> },
           { path: 'policies', element: <ActivePolicies /> },
+          { path: 'profile', element: <ProfilePage /> },
         ],
       },
     ],
+  },
+
+  // Profile Page
+  {
+    path: '/profile',
+    element: <ProfileRedirect />,
   },
 
   // Fallback

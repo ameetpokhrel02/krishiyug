@@ -10,7 +10,8 @@ import {
   Menu,
   CreditCard,
   Leaf,
-  Mic
+  Mic,
+  UserRound
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ const navItems = [
   { icon: FileText, label: 'Submit Claim', path: PATHS.FARMER.SUBMIT_CLAIM },
   { icon: History, label: 'My Policies', path: PATHS.FARMER.POLICIES },
   { icon: CreditCard, label: 'Transactions', path: PATHS.FARMER.TRANSACTIONS },
+  { icon: UserRound, label: 'Profile', path: PATHS.FARMER.PROFILE },
 ];
 
 export const FarmerLayout = () => {
@@ -111,9 +113,13 @@ export const FarmerLayout = () => {
                 <p className="text-sm font-black text-slate-900">{user?.name || 'Farmer'}</p>
                 <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Verified Farmer</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner">
+              <Link
+                to={PATHS.FARMER.PROFILE}
+                className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner cursor-pointer hover:ring-2 hover:ring-emerald-500/20 transition"
+                title="Edit profile"
+              >
                 {initials}
-              </div>
+              </Link>
             </div>
           </div>
         </header>

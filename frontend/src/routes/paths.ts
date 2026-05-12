@@ -37,6 +37,7 @@ export const PATHS = {
     TRANSACTIONS: '/farmer/transactions',
     VOICE_ASSISTANT: '/farmer/voice-assistant',
     SETTINGS: '/farmer/settings',
+    PROFILE: '/farmer/profile',
   },
   INSURANCE: {
     ROOT: '/insurance',
@@ -45,6 +46,7 @@ export const PATHS = {
     FARMERS: '/insurance/farmers',
     POLICIES: '/insurance/policies',
     SETTINGS: '/insurance/settings',
+    PROFILE: '/insurance/profile',
   },
   DASHBOARD: {
     FARMER: '/farmer',

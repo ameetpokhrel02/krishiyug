@@ -37,3 +37,15 @@ export const uploadClaimMedia = upload.fields([
   { name: "images", maxCount: 5 },
   { name: "video", maxCount: 1 },
 ]);
+
+// For profile photo upload: only image, max 2MB
+export const uploadProfilePhoto = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+}).single("photo");

@@ -9,10 +9,12 @@ import {
   Bell,
   Menu,
   LogOut,
-  Leaf
+  Leaf,
+  UserRound
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { PATHS } from '@/routes/paths';
 import { LogoutDialog } from '@/components/shared/LogoutDialog';
 
 const navItems = [
@@ -20,6 +22,7 @@ const navItems = [
   { icon: FileText, label: 'Claims Registry', path: '/insurance/claims' },
   { icon: Users, label: 'Insured Farmers', path: '/insurance/farmers' },
   { icon: ShieldCheck, label: 'Active Policies', path: '/insurance/policies' },
+  { icon: UserRound, label: 'Profile', path: PATHS.INSURANCE.PROFILE },
 ];
 
 export const InsuranceOfficerLayout = () => {
@@ -115,9 +118,13 @@ export const InsuranceOfficerLayout = () => {
                 <p className="text-sm font-black text-slate-900">{user?.name || 'Insurance Officer'}</p>
                 <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Insurance Partner</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner">
+              <Link
+                to={PATHS.INSURANCE.PROFILE}
+                className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-600 text-xs shadow-inner cursor-pointer hover:ring-2 hover:ring-emerald-500/20 transition"
+                title="Edit profile"
+              >
                 {initials}
-              </div>
+              </Link>
             </div>
           </div>
         </header>

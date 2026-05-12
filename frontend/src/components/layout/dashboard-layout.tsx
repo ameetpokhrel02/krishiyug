@@ -1,13 +1,26 @@
-
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { 
   LayoutDashboard, FileText, ShieldCheck, 
   Users, BarChart3, Bell, Settings, LogOut,
   ScanSearch 
 } from 'lucide-react';
 import { AIChatbot } from '@/components/chatbot/ai-chatbot';
+import { PATHS } from '@/routes/paths';
 
 export const DashboardLayout = () => {
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {
+      return {};
+    }
+  })();
+  const profilePath =
+    user?.role === 'admin'
+      ? PATHS.ADMIN.PROFILE
+      : user?.role === 'insurance_company'
+        ? PATHS.INSURANCE.PROFILE
+        : PATHS.FARMER.PROFILE;
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar Placeholder */}
@@ -67,9 +80,13 @@ export const DashboardLayout = () => {
             Welcome back, <span className="text-foreground font-semibold">Krishiyug Farmer</span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <Link
+              to={profilePath}
+              className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:ring-2 hover:ring-primary"
+              title="Edit Profile"
+            >
               KF
-            </div>
+            </Link>
           </div>
         </header>
 

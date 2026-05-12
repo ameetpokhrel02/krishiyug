@@ -15,11 +15,13 @@ import {
   LogOut,
   ChevronRight,
   ShieldCheck,
-  Zap
+  Zap,
+  UserRound
 } from 'lucide-react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { LogoutDialog } from '@/components/shared/LogoutDialog';
+import { PATHS } from '@/routes/paths';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', path: '/admin' },
@@ -30,6 +32,7 @@ const navItems = [
   { icon: ShieldAlert, label: 'Fraud Detection', path: '/admin/fraud' },
   { icon: History, label: 'Audit Logs', path: '/admin/audit-logs' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
+  { icon: UserRound, label: 'Profile', path: PATHS.ADMIN.PROFILE },
 ];
 
 export const AdminLayout = () => {
@@ -128,9 +131,13 @@ export const AdminLayout = () => {
                 <p className="text-sm font-black text-slate-900">{user?.name || 'Admin'}</p>
                 <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Super Administrator</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-black text-indigo-600 text-xs shadow-inner">
+              <Link
+                to={PATHS.ADMIN.PROFILE}
+                className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-black text-indigo-600 text-xs shadow-inner cursor-pointer hover:ring-2 hover:ring-indigo-500/20 transition"
+                title="Edit profile"
+              >
                 {initials}
-              </div>
+              </Link>
             </div>
           </div>
         </header>

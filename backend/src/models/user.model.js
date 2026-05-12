@@ -74,6 +74,10 @@ const userSchema = new mongoose.Schema(
         earTags: [String],
       },
     },
+    photo: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
