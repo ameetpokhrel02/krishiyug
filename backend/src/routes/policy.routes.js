@@ -8,6 +8,7 @@ import {
   buyPolicy,
   togglePolicyStatus,
   updatePolicy,
+  deletePolicy,
 } from "../controllers/policy.controller.js";
 import { uploadApplicationMedia } from "../config/multer.js";
 
@@ -18,6 +19,7 @@ router.post("/", verifyJWT, authorizeRoles("admin"), createPolicy);
 router.get("/all", verifyJWT, authorizeRoles("admin"), getAllPolicies);
 router.patch("/:policyId/toggle", verifyJWT, authorizeRoles("admin"), togglePolicyStatus);
 router.put("/:policyId", verifyJWT, authorizeRoles("admin"), updatePolicy);
+router.delete("/:policyId", verifyJWT, authorizeRoles("admin"), deletePolicy);
 
 // Farmer routes
 router.get("/recommended", verifyJWT, authorizeRoles("farmer"), getRecommendedPolicies);

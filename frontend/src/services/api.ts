@@ -146,6 +146,12 @@ export const insuranceAPI = {
 // PUT  /api/admin/users/:id → update user
 // PATCH /api/admin/users/:id/toggle-status → toggle active/inactive
 // DELETE /api/admin/users/:id → delete user
+// Policy Registry
+// POST /api/policies → create policy
+// GET  /api/policies/all → all policies for admin
+// PUT  /api/policies/:id → update policy
+// PATCH /api/policies/:id/toggle → activate/deactivate
+// DELETE /api/policies/:id → delete policy
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard/stats'),
   getPendingClaims: () => api.get('/admin/claims/pending'),
@@ -172,6 +178,32 @@ export const adminAPI = {
   getPolicyApplications: (status?: string) => api.get('/admin/policy-applications', { params: status ? { status } : {} }),
   verifyPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/verify`, { remarks }),
   rejectPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/reject`, { remarks }),
+
+  // Policy Registry
+  getPolicies: () => api.get('/policies/all'),
+  createPolicy: (data: {
+    name: string;
+    description: string;
+    coverageAmount: number;
+    premium: number;
+    policyType: 'livestock' | 'crop' | 'weather';
+    applicableRegions?: string[];
+    insuranceCompanyId: string;
+  }) => api.post('/policies', data),
+  updatePolicy: (
+    id: string,
+    data: {
+      name: string;
+      description: string;
+      coverageAmount: number;
+      premium: number;
+      policyType: 'livestock' | 'crop' | 'weather';
+      applicableRegions?: string[];
+      insuranceCompanyId: string;
+    }
+  ) => api.put(`/policies/${id}`, data),
+  togglePolicyStatus: (id: string) => api.patch(`/policies/${id}/toggle`),
+  deletePolicy: (id: string) => api.delete(`/policies/${id}`),
 };
 
 // ==================== LOCATION ====================

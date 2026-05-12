@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const AIChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'bot', content: 'Namaste! I am your Krishiyug AI assistant. How can I help you with your agriculture insurance today?' }
+    { role: 'bot', content: 'नमस्कार! म कृषियुग एआई सहायक हुँ। कृषि बीमा, दाबी, र नीति बारे कसरी सहयोग गर्न सक्छु?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,10 +34,14 @@ export const AIChatbot = () => {
     try {
       // Connect to real AI endpoint
       const response: any = await aiAPI.chat(newMessages);
-      const botReply = response?.data?.reply || "I'm having trouble processing that right now. Please try again or contact support.";
+      const botReply = response?.data?.reply || response?.reply || 'माफ गर्नुहोस्, अहिले उत्तर दिन सकिनँ। कृपया फेरि प्रयास गर्नुहोस्।';
       setMessages(prev => [...prev, { role: 'bot', content: botReply }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'bot', content: "Sorry, I'm offline. Please check your connection." }]);
+      const backendMessage = (err as any)?.message || (err as any)?.response?.data?.message;
+      setMessages(prev => [...prev, {
+        role: 'bot',
+        content: backendMessage || 'माफ गर्नुहोस्, अहिले सेवा उपलब्ध छैन। कृपया पछि फेरि प्रयास गर्नुहोस्।'
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +129,7 @@ export const AIChatbot = () => {
                   className="flex w-full gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-100"
                 >
                   <input 
-                    placeholder="Ask about crops, policies..." 
+                    placeholder="सोध्नुहोस् (Ask anything)..." 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none px-3 text-sm font-medium"

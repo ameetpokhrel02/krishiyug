@@ -5,6 +5,7 @@ import Policy from "../models/policy.model.js";
 import User from "../models/user.model.js";
 import PolicyPurchase from "../models/policyPurchase.model.js";
 import cloudinary from "../config/cloudinary.js";
+import { policyCreationSchema } from "../utils/validation.schemas.js";
 
 // Helper function to upload buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder, resourceType = "image") => {
@@ -23,6 +24,48 @@ const uploadToCloudinary = (buffer, folder, resourceType = "image") => {
   });
 };
 
+const normalizeRegions = (regions) => {
+  if (!regions) return [];
+
+  if (Array.isArray(regions)) {
+    return regions.map((region) => String(region).trim()).filter(Boolean);
+  }
+
+  if (typeof regions === "string") {
+    return regions
+      .split(",")
+      .map((region) => region.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+const parsePolicyPayload = (body) => {
+  const payload = {
+    name: body.name,
+    description: body.description,
+    coverageAmount: Number(body.coverageAmount),
+    premium: Number(body.premium),
+    policyType: body.policyType,
+    applicableRegions: normalizeRegions(body.applicableRegions),
+    insuranceCompanyId: body.insuranceCompanyId,
+    isActive: typeof body.isActive === "boolean" ? body.isActive : undefined,
+  };
+
+  const result = policyCreationSchema.safeParse(payload);
+
+  if (!result.success) {
+    const errors = result.error.errors.map((err) => ({
+      field: err.path.join("."),
+      message: err.message,
+    }));
+    throw new ApiError(400, "Validation failed", errors);
+  }
+
+  return result.data;
+};
+
 // Admin creates a new policy
 export const createPolicy = asyncHandler(async (req, res) => {
   const {
@@ -33,7 +76,8 @@ export const createPolicy = asyncHandler(async (req, res) => {
     policyType,
     applicableRegions,
     insuranceCompanyId,
-  } = req.body;
+    isActive,
+  } = parsePolicyPayload(req.body);
 
   // Validate insurance company exists and has correct role
   const insuranceCompany = await User.findById(insuranceCompanyId);
@@ -49,7 +93,7 @@ export const createPolicy = asyncHandler(async (req, res) => {
     policyType,
     applicableRegions: applicableRegions || [],
     insuranceCompanyId,
-    isActive: true,
+    isActive: typeof isActive === "boolean" ? isActive : true,
   });
 
   const populatedPolicy = await Policy.findById(policy._id).populate(
@@ -230,18 +274,50 @@ export const togglePolicyStatus = asyncHandler(async (req, res) => {
 // Update policy
 export const updatePolicy = asyncHandler(async (req, res) => {
   const { policyId } = req.params;
-  const updates = req.body;
+  const policy = await Policy.findById(policyId);
 
-  const policy = await Policy.findByIdAndUpdate(policyId, updates, {
+  if (!policy) {
+    throw new ApiError(404, "Policy not found");
+  }
+
+  const updates = {
+    ...parsePolicyPayload({
+      ...policy.toObject(),
+      insuranceCompanyId: String(policy.insuranceCompanyId),
+      ...req.body,
+    }),
+  };
+
+  if (typeof req.body.isActive === "boolean") {
+    updates.isActive = req.body.isActive;
+  }
+
+  const insuranceCompany = await User.findById(updates.insuranceCompanyId);
+  if (!insuranceCompany || insuranceCompany.role !== "insurance_company") {
+    throw new ApiError(400, "Invalid insurance company ID");
+  }
+
+  const updatedPolicy = await Policy.findByIdAndUpdate(policyId, updates, {
     new: true,
     runValidators: true,
   }).populate("insuranceCompanyId", "name companyName");
+
+  res.status(200).json(
+    new ApiResponse(200, updatedPolicy, "Policy updated successfully")
+  );
+});
+
+// Delete policy
+export const deletePolicy = asyncHandler(async (req, res) => {
+  const { policyId } = req.params;
+
+  const policy = await Policy.findByIdAndDelete(policyId);
 
   if (!policy) {
     throw new ApiError(404, "Policy not found");
   }
 
   res.status(200).json(
-    new ApiResponse(200, policy, "Policy updated successfully")
+    new ApiResponse(200, null, "Policy deleted successfully")
   );
 });
