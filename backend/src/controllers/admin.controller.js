@@ -376,7 +376,7 @@ export const updateUser = asyncHandler(async (req, res) => {
   if (companyName) user.companyName = companyName;
   if (wardNumber) user.wardNumber = wardNumber;
 
-  await user.save();
+  await user.save({ validateModifiedOnly: true });
 
   const response = user.toJSON();
 
@@ -396,16 +396,20 @@ export const toggleUserStatus = asyncHandler(async (req, res) => {
   }
 
   // Toggle between active and inactive
-  user.status = user.status === "active" ? "inactive" : "active";
-  await user.save();
+  const newStatus = user.status === "active" ? "inactive" : "active";
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { status: newStatus },
+    { new: true }
+  );
 
-  const response = user.toJSON();
+  const response = updatedUser.toJSON();
 
   res.status(200).json(
     new ApiResponse(
       200,
       response,
-      `User ${user.status === "active" ? "activated" : "deactivated"} successfully`
+      `User ${newStatus === "active" ? "activated" : "deactivated"} successfully`
     )
   );
 });
