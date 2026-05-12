@@ -9,6 +9,7 @@ import {
   togglePolicyStatus,
   updatePolicy,
 } from "../controllers/policy.controller.js";
+import { uploadApplicationMedia } from "../config/multer.js";
 
 const router = express.Router();
 
@@ -20,6 +21,6 @@ router.put("/:policyId", verifyJWT, authorizeRoles("admin"), updatePolicy);
 
 // Farmer routes
 router.get("/recommended", verifyJWT, authorizeRoles("farmer"), getRecommendedPolicies);
-router.post("/buy", verifyJWT, authorizeRoles("farmer"), buyPolicy);
+router.post("/buy", verifyJWT, authorizeRoles("farmer"), uploadApplicationMedia, buyPolicy);
 
 export default router;

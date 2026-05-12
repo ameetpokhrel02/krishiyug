@@ -16,6 +16,9 @@ import {
   updateUser,
   toggleUserStatus,
   deleteUser,
+  getPolicyApplications,
+  verifyPolicyApplication,
+  rejectPolicyApplication,
 } from "../controllers/admin.controller.js";
 
 console.log("[DEBUG] Loading Admin Routes...");
@@ -45,5 +48,10 @@ router.post("/claims/reject", verifyJWT, authorizeRoles("admin"), rejectClaim);
 // Insurance company management
 router.post("/insurance-company", verifyJWT, authorizeRoles("admin"), createInsuranceCompany);
 router.get("/insurance-companies", verifyJWT, authorizeRoles("admin"), getInsuranceCompanies);
+
+// Policy Applications management
+router.get("/policy-applications", verifyJWT, authorizeRoles("admin"), getPolicyApplications);
+router.post("/policy-applications/:id/verify", verifyJWT, authorizeRoles("admin"), verifyPolicyApplication);
+router.post("/policy-applications/:id/reject", verifyJWT, authorizeRoles("admin"), rejectPolicyApplication);
 
 export default router;

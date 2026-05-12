@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Policy } from '@/types/platform';
+import { adminAPI } from '@/services/api';
+import { toast } from 'sonner';
 
 const mockPolicies: Policy[] = [
   { id: 'P1', title: 'Monsoon Crop Guard', category: 'CROP', description: 'Comprehensive coverage for paddy and maize against floods and droughts.', premiumRate: 2.5, coverageAmount: 100000, insuranceCompanyId: 'INS1', insuranceCompanyName: 'Shikhar Insurance', status: 'ACTIVE' },
@@ -22,6 +24,55 @@ const mockPolicies: Policy[] = [
 
 export const AdminPolicyManagement = () => {
   const [policies] = useState<Policy[]>(mockPolicies);
+  const [activeTab, setActiveTab] = useState<'policies' | 'applications'>('policies');
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Verification Modal State
+  const [verifyModal, setVerifyModal] = useState<{ show: boolean, type: 'verify' | 'reject', app: any | null }>({ show: false, type: 'verify', app: null });
+  const [remarks, setRemarks] = useState('');
+  const [processing, setProcessing] = useState(false);
+
+  const fetchApplications = async () => {
+    setLoading(true);
+    try {
+      const res = await adminAPI.getPolicyApplications();
+      setApplications((res as any).data?.data || []);
+    } catch {
+      toast.error('Failed to load applications');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAction = async () => {
+    if (!verifyModal.app) return;
+    setProcessing(true);
+    try {
+      if (verifyModal.type === 'verify') {
+        await adminAPI.verifyPolicyApplication(verifyModal.app._id, remarks);
+        toast.success('Application verified successfully!');
+      } else {
+        await adminAPI.rejectPolicyApplication(verifyModal.app._id, remarks);
+        toast.success('Application rejected!');
+      }
+      setVerifyModal({ show: false, type: 'verify', app: null });
+      setRemarks('');
+      fetchApplications();
+    } catch (err: any) {
+      toast.error(err?.message || 'Action failed');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  import('react').then(React => {
+    React.useEffect(() => {
+      if (activeTab === 'applications') {
+        fetchApplications();
+      }
+    }, [activeTab]);
+  });
 
   return (
     <div className="space-y-8">
@@ -56,8 +107,32 @@ export const AdminPolicyManagement = () => {
         ))}
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200 mb-6">
+        <button
+          onClick={() => setActiveTab('policies')}
+          className={cn(
+            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
+            activeTab === 'policies' ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700"
+          )}
+        >
+          Policies Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('applications')}
+          className={cn(
+            "px-6 py-3 text-sm font-bold border-b-2 transition-colors",
+            activeTab === 'applications' ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-500 hover:text-slate-700"
+          )}
+        >
+          Farmer Applications
+        </button>
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {activeTab === 'policies' ? (
+          <>
+            <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
            <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
@@ -136,7 +211,143 @@ export const AdminPolicyManagement = () => {
             </tbody>
           </table>
         </div>
+          </>
+        ) : (
+          /* Applications Tab */
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="p-12 text-center text-slate-500">Loading applications...</div>
+            ) : applications.length === 0 ? (
+              <div className="p-12 text-center text-slate-500">No applications found.</div>
+            ) : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-slate-50/50">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Farmer</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Policy</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Details</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {applications.map((app) => (
+                    <tr key={app._id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold text-slate-900">{app.farmerId?.name}</p>
+                        <p className="text-xs text-slate-500">{app.farmerId?.phoneNumber}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold text-slate-900">{app.policyId?.name}</p>
+                        <p className="text-xs text-slate-500 uppercase">{app.policyId?.policyType}</p>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        <div className="flex flex-col gap-1">
+                          <div>
+                            {app.applicationDetails?.farmSize ? `Size: ${app.applicationDetails.farmSize} ` : ''}
+                            {app.applicationDetails?.cropTypes?.length ? `| Crops: ${app.applicationDetails.cropTypes.join(', ')} ` : ''}
+                            {app.applicationDetails?.livestockCount ? `| Animals: ${app.applicationDetails.livestockCount} ` : ''}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            <strong>Municipality:</strong> {app.applicationDetails?.municipalityName || 'N/A'} | <strong>Ward:</strong> {app.applicationDetails?.wardNumber} | <strong>ID:</strong> {app.applicationDetails?.citizenshipNumber}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            <strong>Lalpurja:</strong> {app.applicationDetails?.landOwnershipNo || 'N/A'}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            <strong>Bank:</strong> {app.applicationDetails?.bankName || 'N/A'} | <strong>A/C:</strong> {app.applicationDetails?.bankAccountNo || 'N/A'}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            <strong>Nominee:</strong> {app.applicationDetails?.nomineeName || 'N/A'}
+                            {app.applicationDetails?.nomineePhone && ` (${app.applicationDetails.nomineePhone})`}
+                          </div>
+                          
+                          {(app.applicationDetails?.citizenshipImageUrl || app.applicationDetails?.lalpurjaImageUrl) && (
+                            <div className="mt-2 flex gap-3">
+                              {app.applicationDetails?.citizenshipImageUrl && (
+                                <a 
+                                  href={app.applicationDetails.citizenshipImageUrl} 
+                                  target="_blank" 
+                                  rel="noreferrer"
+                                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline flex items-center gap-1"
+                                >
+                                  View Citizenship
+                                </a>
+                              )}
+                              {app.applicationDetails?.lalpurjaImageUrl && (
+                                <a 
+                                  href={app.applicationDetails.lalpurjaImageUrl} 
+                                  target="_blank" 
+                                  rel="noreferrer"
+                                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline flex items-center gap-1"
+                                >
+                                  View Lalpurja
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
+                          app.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                          app.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' :
+                          'bg-emerald-50 text-emerald-600 border-emerald-100'
+                        )}>
+                          {app.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {app.status === 'pending' && (
+                          <div className="flex items-center justify-end gap-2">
+                             <Button size="sm" onClick={() => setVerifyModal({ show: true, type: 'verify', app })} className="bg-emerald-500 hover:bg-emerald-600 text-white h-8 text-xs rounded-lg">
+                                Verify
+                             </Button>
+                             <Button size="sm" variant="outline" onClick={() => setVerifyModal({ show: true, type: 'reject', app })} className="border-red-200 text-red-600 hover:bg-red-50 h-8 text-xs rounded-lg">
+                                Reject
+                             </Button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Verify/Reject Modal */}
+      {verifyModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              {verifyModal.type === 'verify' ? 'Verify Application' : 'Reject Application'}
+            </h2>
+            <p className="text-sm text-slate-500 mb-4">
+              Add remarks for {verifyModal.app?.farmerId?.name}'s application.
+            </p>
+            <textarea
+              value={remarks}
+              onChange={e => setRemarks(e.target.value)}
+              className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm mb-4"
+              rows={4}
+              placeholder="Enter remarks..."
+            />
+            <div className="flex gap-3">
+              <Button onClick={() => setVerifyModal({ show: false, type: 'verify', app: null })} variant="outline" className="flex-1 rounded-xl">Cancel</Button>
+              <Button onClick={handleAction} disabled={processing} className={cn(
+                "flex-1 text-white rounded-xl",
+                verifyModal.type === 'verify' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'
+              )}>
+                {processing ? 'Processing...' : 'Confirm'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

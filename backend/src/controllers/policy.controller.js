@@ -3,6 +3,25 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Policy from "../models/policy.model.js";
 import User from "../models/user.model.js";
+import PolicyPurchase from "../models/policyPurchase.model.js";
+import cloudinary from "../config/cloudinary.js";
+
+// Helper function to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder, resourceType = "image") => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: resourceType,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+};
 
 // Admin creates a new policy
 export const createPolicy = asyncHandler(async (req, res) => {
@@ -99,9 +118,9 @@ export const getRecommendedPolicies = asyncHandler(async (req, res) => {
   );
 });
 
-// Farmer buys a policy (simplified - no payment integration)
+// Farmer applies for a policy
 export const buyPolicy = asyncHandler(async (req, res) => {
-  const { policyId } = req.body;
+  const { policyId, applicationDetails } = req.body;
   const farmerId = req.user._id;
 
   const policy = await Policy.findById(policyId);
@@ -109,16 +128,80 @@ export const buyPolicy = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Policy not available");
   }
 
-  // In production, create a PolicyPurchase model to track purchases
-  // For now, just return success
-  res.status(200).json(
+  // Check if farmer already has a pending or active application for this policy
+  const existingApplication = await PolicyPurchase.findOne({
+    farmerId,
+    policyId,
+    status: { $in: ["pending", "admin_verified", "approved"] }
+  });
+
+  if (existingApplication) {
+    throw new ApiError(400, "You already have an active or pending application for this policy");
+  }
+
+  // Parse application details (which comes as a string when using FormData)
+  let parsedDetails = {};
+  if (typeof applicationDetails === "string") {
+    try {
+      parsedDetails = JSON.parse(applicationDetails);
+    } catch (e) {
+      throw new ApiError(400, "Invalid application details format");
+    }
+  } else {
+    parsedDetails = applicationDetails;
+  }
+
+  // Handle document image uploads
+  let lalpurjaImageUrl = null;
+  let citizenshipImageUrl = null;
+  
+  const lalpurjaImage = req.files?.lalpurjaImage ? req.files.lalpurjaImage[0] : null;
+  const citizenshipImage = req.files?.citizenshipImage ? req.files.citizenshipImage[0] : null;
+
+  if (lalpurjaImage) {
+    try {
+      const result = await uploadToCloudinary(
+        lalpurjaImage.buffer,
+        "krishiyug/policies/documents",
+        "auto"
+      );
+      lalpurjaImageUrl = result.secure_url;
+    } catch (error) {
+      throw new ApiError(500, `Failed to upload Lalpurja document: ${error.message}`);
+    }
+  }
+
+  if (citizenshipImage) {
+    try {
+      const result = await uploadToCloudinary(
+        citizenshipImage.buffer,
+        "krishiyug/policies/documents",
+        "auto"
+      );
+      citizenshipImageUrl = result.secure_url;
+    } catch (error) {
+      throw new ApiError(500, `Failed to upload Citizenship document: ${error.message}`);
+    }
+  }
+
+  parsedDetails.lalpurjaImageUrl = lalpurjaImageUrl;
+  parsedDetails.citizenshipImageUrl = citizenshipImageUrl;
+
+  const policyPurchase = await PolicyPurchase.create({
+    farmerId,
+    policyId,
+    status: "pending",
+    applicationDetails: parsedDetails
+  });
+
+  res.status(201).json(
     new ApiResponse(
-      200,
+      201,
       {
-        policy,
-        message: "Policy purchased successfully. You can now file claims under this policy.",
+        policyPurchase,
+        message: "Policy application submitted successfully. It is now pending admin verification.",
       },
-      "Policy purchase successful"
+      "Policy application successful"
     )
   );
 });

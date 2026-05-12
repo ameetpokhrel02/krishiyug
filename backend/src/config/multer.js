@@ -5,11 +5,11 @@ const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   // Images: jpeg, png
-  if (file.fieldname === "images") {
-    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+  if (file.fieldname === "images" || file.fieldname === "documentImage" || file.fieldname === "lalpurjaImage" || file.fieldname === "citizenshipImage") {
+    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error("Only JPEG/PNG images allowed"), false);
+      cb(new Error("Only JPEG/PNG images or PDF allowed"), false);
     }
   }
   // Video: mp4 only
@@ -36,4 +36,11 @@ const upload = multer({
 export const uploadClaimMedia = upload.fields([
   { name: "images", maxCount: 5 },
   { name: "video", maxCount: 1 },
+]);
+
+// For policy application submission
+export const uploadApplicationMedia = upload.fields([
+  { name: "documentImage", maxCount: 1 },
+  { name: "lalpurjaImage", maxCount: 1 },
+  { name: "citizenshipImage", maxCount: 1 }
 ]);

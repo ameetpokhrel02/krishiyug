@@ -106,7 +106,7 @@ export const policyAPI = {
   getAll: () => api.get('/policies/all'),
   getRecommended: () => api.get('/policies/recommended'),
   getById: (id: string) => api.get(`/policies/${id}`),
-  buy: (policyId: string) => api.post('/policies/buy', { policyId }),
+  buy: (data: FormData) => api.post('/policies/buy', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
 // ==================== INSURANCE ====================
@@ -161,6 +161,11 @@ export const adminAPI = {
   toggleUserStatus: (id: string) => api.patch(`/admin/users/${id}/toggle-status`),
   deleteUser: (id: string) => api.delete(`/admin/users/${id}`),
   provisionUser: (data: any) => api.post('/admin/provision-user', data),
+
+  // Policy Applications
+  getPolicyApplications: (status?: string) => api.get('/admin/policy-applications', { params: status ? { status } : {} }),
+  verifyPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/verify`, { remarks }),
+  rejectPolicyApplication: (id: string, remarks?: string) => api.post(`/admin/policy-applications/${id}/reject`, { remarks }),
 };
 
 // ==================== LOCATION ====================

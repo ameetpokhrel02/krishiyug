@@ -5,6 +5,7 @@ import Claim from "../models/claim.model.js";
 import Policy from "../models/policy.model.js";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
+import PolicyPurchase from "../models/policyPurchase.model.js";
 import { adminLoginSchema } from "../utils/validation.schemas.js";
 
 // Admin login using email and password
@@ -435,3 +436,91 @@ export const deleteUser = asyncHandler(async (req, res) => {
     new ApiResponse(200, null, "User deleted successfully")
   );
 });
+
+// Admin views policy applications
+export const getPolicyApplications = asyncHandler(async (req, res) => {
+  const { status } = req.query;
+  const filter = status ? { status } : {};
+
+  const applications = await PolicyPurchase.find(filter)
+    .populate("farmerId", "name phoneNumber farmerDetails")
+    .populate("policyId", "name policyType coverageAmount premium")
+    .sort("-createdAt");
+
+  res.status(200).json(
+    new ApiResponse(200, applications, "Policy applications retrieved successfully")
+  );
+});
+
+// Admin verifies a policy application
+export const verifyPolicyApplication = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { remarks } = req.body;
+
+  const application = await PolicyPurchase.findById(id).populate("policyId");
+
+  if (!application) {
+    throw new ApiError(404, "Policy application not found");
+  }
+
+  if (application.status !== "pending") {
+    throw new ApiError(400, "Only pending applications can be verified");
+  }
+
+  application.status = "admin_verified";
+  application.adminVerification = {
+    verifiedBy: req.user._id,
+    verifiedAt: new Date(),
+    remarks: remarks || "Verified and approved by Admin",
+  };
+
+  await application.save();
+
+  // Notify farmer
+  await Notification.create({
+    userId: application.farmerId,
+    message: `Your application for ${application.policyId.name} has been verified and approved.`,
+    status: "admin_verified",
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, application, "Policy application verified successfully")
+  );
+});
+
+// Admin rejects a policy application
+export const rejectPolicyApplication = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { remarks } = req.body;
+
+  const application = await PolicyPurchase.findById(id).populate("policyId");
+
+  if (!application) {
+    throw new ApiError(404, "Policy application not found");
+  }
+
+  if (application.status !== "pending") {
+    throw new ApiError(400, "Only pending applications can be rejected");
+  }
+
+  application.status = "rejected";
+  application.adminVerification = {
+    verifiedBy: req.user._id,
+    verifiedAt: new Date(),
+    remarks: remarks || "Application rejected due to invalid details.",
+  };
+
+  await application.save();
+
+  // Notify farmer
+  await Notification.create({
+    userId: application.farmerId,
+    message: `Your application for ${application.policyId.name} was rejected. Reason: ${remarks}`,
+    status: "rejected",
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, application, "Policy application rejected successfully")
+  );
+});
+

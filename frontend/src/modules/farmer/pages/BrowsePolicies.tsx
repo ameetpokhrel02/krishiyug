@@ -9,7 +9,8 @@ import {
   Info,
   CheckCircle2,
   Loader2,
-  Tag
+  Tag,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,26 @@ export const FarmerBrowsePolicies = () => {
   const [buying, setBuying] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [activeType, setActiveType] = useState<PolicyType>('all');
+  
+  // Application Modal State
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPolicy, setSelectedPolicy] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    farmSize: '',
+    cropTypes: '',
+    livestockCount: '',
+    citizenshipNumber: '',
+    wardNumber: '',
+    landOwnershipNo: '',
+    bankName: '',
+    bankAccountNo: '',
+    municipalityName: farmerProfile?.location?.palika || '',
+    nomineeName: '',
+    nomineePhone: '',
+    nomineeEmail: '',
+    lalpurjaImage: null as File | null,
+    citizenshipImage: null as File | null
+  });
 
   useEffect(() => {
     const fetchPolicies = async () => {
@@ -42,13 +63,65 @@ export const FarmerBrowsePolicies = () => {
     fetchPolicies();
   }, []);
 
-  const handleBuy = async (policyId: string) => {
-    setBuying(policyId);
+  const openApplicationModal = (policy: any) => {
+    setSelectedPolicy(policy);
+    setFormData({
+      farmSize: farmerProfile?.farmSize?.toString() || '',
+      cropTypes: farmerProfile?.cropTypes?.join(', ') || '',
+      livestockCount: '',
+      citizenshipNumber: '',
+      wardNumber: farmerProfile?.location?.ward || '',
+      landOwnershipNo: '',
+      municipalityName: farmerProfile?.location?.palika || '',
+      bankName: '',
+      bankAccountNo: '',
+      nomineeName: '',
+      nomineePhone: '',
+      nomineeEmail: '',
+      lalpurjaImage: null,
+      citizenshipImage: null
+    });
+    setShowModal(true);
+  };
+
+  const submitApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPolicy) return;
+    
+    setBuying(selectedPolicy._id);
     try {
-      await policyAPI.buy(policyId);
-      toast.success('Policy purchased! You can now file claims under this policy.');
+      const applicationDetails = {
+        farmSize: Number(formData.farmSize) || 0,
+        cropTypes: formData.cropTypes.split(',').map(s => s.trim()).filter(Boolean),
+        livestockCount: Number(formData.livestockCount) || 0,
+        citizenshipNumber: formData.citizenshipNumber,
+        wardNumber: formData.wardNumber,
+        landOwnershipNo: formData.landOwnershipNo,
+        municipalityName: formData.municipalityName,
+        bankName: formData.bankName,
+        bankAccountNo: formData.bankAccountNo,
+        nomineeName: formData.nomineeName,
+        nomineePhone: formData.nomineePhone,
+        nomineeEmail: formData.nomineeEmail
+      };
+
+      const payload = new FormData();
+      payload.append('policyId', selectedPolicy._id);
+      payload.append('applicationDetails', JSON.stringify(applicationDetails));
+      
+      if (formData.lalpurjaImage) {
+        payload.append('lalpurjaImage', formData.lalpurjaImage);
+      }
+      if (formData.citizenshipImage) {
+        payload.append('citizenshipImage', formData.citizenshipImage);
+      }
+
+      await policyAPI.buy(payload);
+      toast.success('Application submitted! It is pending admin verification.');
+      setShowModal(false);
+      setSelectedPolicy(null);
     } catch (err: any) {
-      toast.error(err?.message || 'Purchase failed. Please try again.');
+      toast.error(err?.message || 'Application failed. Please try again.');
     } finally {
       setBuying(null);
     }
@@ -187,7 +260,7 @@ export const FarmerBrowsePolicies = () => {
                     {policy.policyType}
                   </span>
                   <Button
-                    onClick={() => handleBuy(policy._id)}
+                    onClick={() => openApplicationModal(policy)}
                     disabled={buying === policy._id}
                     className="bg-emerald-950 hover:bg-black text-white rounded-2xl shadow-lg shadow-emerald-200 text-[10px] font-black uppercase tracking-widest"
                   >
@@ -236,6 +309,216 @@ export const FarmerBrowsePolicies = () => {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Application Form Modal */}
+      {showModal && selectedPolicy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+          >
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div>
+                <h2 className="text-xl font-black text-slate-900">Apply for Policy</h2>
+                <p className="text-xs text-slate-500 mt-1">{selectedPolicy.name}</p>
+              </div>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <form onSubmit={submitApplication} className="p-6 space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Farm Size (Acres/Ropani)</label>
+                <input
+                  required
+                  type="number"
+                  value={formData.farmSize}
+                  onChange={e => setFormData(f => ({ ...f, farmSize: e.target.value }))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                  placeholder="E.g. 5"
+                />
+              </div>
+
+              {selectedPolicy.policyType === 'livestock' ? (
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Livestock Count</label>
+                  <input
+                    required
+                    type="number"
+                    value={formData.livestockCount}
+                    onChange={e => setFormData(f => ({ ...f, livestockCount: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Number of animals to insure"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Crop Types</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.cropTypes}
+                    onChange={e => setFormData(f => ({ ...f, cropTypes: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="E.g. Rice, Wheat (comma separated)"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Citizenship No.</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.citizenshipNumber}
+                    onChange={e => setFormData(f => ({ ...f, citizenshipNumber: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Your ID No."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Citizenship Photo</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setFormData(f => ({ ...f, citizenshipImage: e.target.files![0] }));
+                      }
+                    }}
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Land Ownership No.</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.landOwnershipNo}
+                    onChange={e => setFormData(f => ({ ...f, landOwnershipNo: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Lalpurja No."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Lalpurja Photo</label>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setFormData(f => ({ ...f, lalpurjaImage: e.target.files![0] }));
+                      }
+                    }}
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Municipality Name</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.municipalityName}
+                    onChange={e => setFormData(f => ({ ...f, municipalityName: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Nagarpalika/Gaupalika"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Ward Number</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.wardNumber}
+                    onChange={e => setFormData(f => ({ ...f, wardNumber: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="E.g. 12"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Bank Name</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.bankName}
+                    onChange={e => setFormData(f => ({ ...f, bankName: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="E.g. Nabil Bank"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Bank Account No.</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.bankAccountNo}
+                    onChange={e => setFormData(f => ({ ...f, bankAccountNo: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="A/C for payout"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Nominee Full Name</label>
+                <input
+                  required
+                  type="text"
+                  value={formData.nomineeName}
+                  onChange={e => setFormData(f => ({ ...f, nomineeName: e.target.value }))}
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                  placeholder="Full name of nominee"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Nominee Phone</label>
+                  <input
+                    required
+                    type="text"
+                    value={formData.nomineePhone}
+                    onChange={e => setFormData(f => ({ ...f, nomineePhone: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Phone number"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-600 uppercase tracking-widest">Nominee Email</label>
+                  <input
+                    type="email"
+                    value={formData.nomineeEmail}
+                    onChange={e => setFormData(f => ({ ...f, nomineeEmail: e.target.value }))}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm"
+                    placeholder="Email address"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <Button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={buying === selectedPolicy._id} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-200">
+                  {buying === selectedPolicy._id ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Application'}
+                </Button>
+              </div>
+            </form>
+          </motion.div>
         </div>
       )}
     </div>
