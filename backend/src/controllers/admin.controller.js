@@ -209,19 +209,44 @@ export const rejectClaim = asyncHandler(async (req, res) => {
 export const createInsuranceCompany = asyncHandler(async (req, res) => {
   const { name, phoneNumber, password, companyName } = req.body;
 
+  const safeName = String(name || "").trim();
+  const safeCompanyName = String(companyName || "").trim();
+  const safePhoneNumber = String(phoneNumber || "").replace(/\D/g, "");
+  const safePassword = String(password || "");
+
+  if (!safeName || !safeCompanyName || !safePhoneNumber || !safePassword) {
+    throw new ApiError(400, "name, companyName, phoneNumber and password are required");
+  }
+
+  if (!/^[0-9]{10}$/.test(safePhoneNumber)) {
+    throw new ApiError(400, "Phone number must be a valid 10-digit number");
+  }
+
+  if (safePassword.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters");
+  }
+
   // Check if phone number already exists
-  const existing = await User.findOne({ phoneNumber });
+  const existing = await User.findOne({ phoneNumber: safePhoneNumber });
   if (existing) {
     throw new ApiError(409, "Phone number already registered");
   }
 
-  const insuranceCompany = await User.create({
-    name,
-    phoneNumber,
-    password,
-    role: "insurance_company",
-    companyName,
-  });
+  let insuranceCompany;
+  try {
+    insuranceCompany = await User.create({
+      name: safeName,
+      phoneNumber: safePhoneNumber,
+      password: safePassword,
+      role: "insurance_company",
+      companyName: safeCompanyName,
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
+      throw new ApiError(409, "Phone number already registered");
+    }
+    throw error;
+  }
 
   const response = insuranceCompany.toJSON();
 

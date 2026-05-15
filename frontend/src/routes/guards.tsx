@@ -73,8 +73,10 @@ export const RoleGuard = ({ allowedRoles }: { allowedRoles: string[] }) => {
       admin: PATHS.ADMIN.ROOT,
       farmer: PATHS.FARMER.ROOT,
       insurance_company: PATHS.INSURANCE.ROOT,
+      insurance_agent: PATHS.INSURANCE.ROOT,
+      insurance_officer: PATHS.INSURANCE.ROOT,
     };
-    const userDashboard = roleDashboard[user.role] || PATHS.HOME;
+    const userDashboard = roleDashboard[user.role.toLowerCase()] || PATHS.HOME;
     return <Navigate to={userDashboard} replace />;
   }
 

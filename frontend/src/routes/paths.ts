@@ -60,6 +60,7 @@ export const PATHS = {
     INSURANCE_AGENT: '/agent',
     insurance_agent: '/agent',
     INSURANCE_OFFICER: '/insurance',
+    insurance_officer: '/insurance',
     INSURANCE: '/insurance',
   },
 } as const;

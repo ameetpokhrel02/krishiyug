@@ -11,7 +11,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [credentials, setCredentials] = useState({ phoneNumber: '', password: '' });
+  const [credentials, setCredentials] = useState({ identifier: '', password: '' });
   const selectedRole = location.state?.selectedRole || 'FARMER';
   const canRegister = selectedRole === 'FARMER';
 
@@ -28,17 +28,19 @@ export const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!credentials.phoneNumber || !credentials.password) {
+    if (!credentials.identifier || !credentials.password) {
       toast.error('Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
     try {
-      const response: any = await authAPI.login({
-        phoneNumber: credentials.phoneNumber,
-        password: credentials.password
-      });
+      const loginData = { 
+        phoneNumber: credentials.identifier.replace(/\D/g, ''),
+        password: credentials.password 
+      };
+
+      const response: any = await authAPI.login(loginData);
 
       // Response structure: { data: { statusCode, success, message, data: { user, token, redirectTo } } }
       const responseData = response?.data;
@@ -79,16 +81,17 @@ export const LoginPage = () => {
 
         <form className="space-y-4" onSubmit={handleLogin}>
           <div className="space-y-1.5">
-            <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Contact Identity</label>
+            <label className="text-sm font-bold text-slate-700 uppercase tracking-widest text-[10px]">Phone Number</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
-                type="text" 
+                type="text"
                 placeholder="Phone Number (10 digits)" 
-                value={credentials.phoneNumber}
-                onChange={(e) => setCredentials({...credentials, phoneNumber: e.target.value.replace(/\D/g, '')})}
+                value={credentials.identifier}
+                onChange={(e) => {
+                  setCredentials({...credentials, identifier: e.target.value.replace(/\D/g, '').slice(0, 10)});
+                }}
                 disabled={isLoading}
-                maxLength={10}
                 className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-sm disabled:opacity-50"
               />
             </div>

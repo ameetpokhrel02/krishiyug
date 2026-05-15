@@ -64,7 +64,7 @@ export const authAPI = {
     companyName?: string;
   }) => api.post('/auth/register', data),
 
-  login: (data: { phoneNumber: string; password: string }) =>
+  login: (data: { phoneNumber?: string; email?: string; password: string }) =>
     api.post('/auth/login', data),
 
   adminLogin: (data: { identifier: string; password: string }) =>

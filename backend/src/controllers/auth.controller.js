@@ -17,7 +17,7 @@ export const register = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Validation failed", errors);
   }
 
-  const { phoneNumber, password, name, role, wardNumber, insuranceCompanyId, farmerDetails } = validationResult.data;
+  const { phoneNumber, password, name, role, wardNumber, insuranceCompanyId, farmerDetails, companyName } = validationResult.data;
 
   // Check if user already exists
   const existingUser = await User.findOne({ phoneNumber });
@@ -37,6 +37,8 @@ export const register = asyncHandler(async (req, res) => {
     userData.wardNumber = wardNumber;
   } else if (role === "insurance_agent") {
     userData.insuranceCompanyId = insuranceCompanyId;
+  } else if (role === "insurance_company") {
+    userData.companyName = companyName;
   } else if (role === "farmer") {
     userData.farmerDetails = farmerDetails;
   }
@@ -55,6 +57,10 @@ export const register = asyncHandler(async (req, res) => {
     farmer: "/farmer",
     admin: "/admin",
     insurance_company: "/insurance",
+    insurance_agent: "/insurance",
+    insurance_officer: "/insurance",
+    INSURANCE_OFFICER: "/insurance",
+    ward_official: "/ward",
   };
 
   const redirectTo = redirectPaths[user.role] || "/";
@@ -85,20 +91,38 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Validation failed", errors);
   }
 
-  const { phoneNumber, password } = validationResult.data;
+  const { phoneNumber, email, password } = validationResult.data;
+
+  // Build query to search by either phoneNumber or email
+  // Use $or to search flexibly
+  const query = {
+    $or: []
+  };
+  
+  if (phoneNumber) {
+    query.$or.push({ phoneNumber });
+  }
+  if (email) {
+    query.$or.push({ email: email?.toLowerCase() });
+  }
+
+  console.log("[LOGIN DEBUG] Query:", JSON.stringify(query));
+  console.log("[LOGIN DEBUG] Looking for user with phoneNumber:", phoneNumber, "or email:", email);
 
   // Find user and explicitly select password field
-  const user = await User.findOne({ phoneNumber }).select("+password");
+  const user = await User.findOne(query).select("+password");
+
+  console.log("[LOGIN DEBUG] User found:", user ? `${user.name} (${user.role})` : "NOT FOUND");
 
   if (!user) {
-    throw new ApiError(401, "Invalid credentials");
+    throw new ApiError(401, "Invalid credentials - user not found");
   }
 
   // Compare password
   const isPasswordValid = await user.comparePassword(password);
 
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid credentials");
+    throw new ApiError(401, "Invalid credentials - password incorrect");
   }
 
   // Generate token
@@ -112,6 +136,10 @@ export const login = asyncHandler(async (req, res) => {
     farmer: "/farmer",
     admin: "/admin",
     insurance_company: "/insurance",
+    insurance_agent: "/insurance",
+    insurance_officer: "/insurance",
+    INSURANCE_OFFICER: "/insurance",
+    ward_official: "/ward",
   };
 
   const redirectTo = redirectPaths[user.role] || "/";

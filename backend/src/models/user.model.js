@@ -6,15 +6,23 @@ const userSchema = new mongoose.Schema(
   {
     phoneNumber: {
       type: String,
-      required: function() { return this.role !== 'admin'; },
+      required: function() { 
+        // Required for farmers, ward officials, and insurance users (existing)
+        // Not required for admins (they use email)
+        return this.role !== 'admin';
+      },
       unique: false,
       trim: true,
       match: [/^[0-9]{10}$/, "Please provide a valid 10-digit phone number"],
       index: true,
+      sparse: true,
     },
     email: {
       type: String,
-      required: function() { return this.role === 'admin'; },
+      required: function() { 
+        // Required for admins only
+        return this.role === 'admin';
+      },
       unique: true,
       trim: true,
       lowercase: true,
@@ -37,8 +45,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Role is required"],
       enum: {
-        values: ["farmer", "insurance_company", "admin", "ward_official", "insurance_agent"],
-        message: "Role must be farmer, insurance_company, admin, ward_official, or insurance_agent",
+        values: ["farmer", "insurance_company", "admin", "ward_official", "insurance_agent", "insurance_officer", "INSURANCE_OFFICER"],
+        message: "Role must be farmer, insurance_company, admin, ward_official, insurance_agent, or insurance_officer",
       },
     },
     status: {

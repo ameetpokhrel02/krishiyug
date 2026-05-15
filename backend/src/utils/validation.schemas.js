@@ -11,8 +11,8 @@ export const registerSchema = z
     name: z
       .string()
       .min(2, "Name must be at least 2 characters"),
-    role: z.enum(["farmer", "insurance_company", "admin"], {
-      errorMap: () => ({ message: "Role must be farmer, insurance_company, or admin" }),
+    role: z.enum(["farmer", "insurance_company", "admin", "ward_official", "insurance_agent", "insurance_officer", "INSURANCE_OFFICER"], {
+      errorMap: () => ({ message: "Role must be farmer, insurance_company, admin, ward_official, insurance_agent, or insurance_officer" }),
     }),
     companyName: z.string().optional(),
     farmerDetails: z
@@ -55,14 +55,26 @@ export const registerSchema = z
     }
   );
 
-export const loginSchema = z.object({
-  phoneNumber: z
-    .string()
-    .regex(/^[0-9]{10}$/, "Invalid phone number (must be 10 digits)"),
-  password: z
-    .string()
-    .min(1, "Password is required"),
-});
+export const loginSchema = z
+  .object({
+    phoneNumber: z
+      .string()
+      .regex(/^[0-9]{10}$/, "Invalid phone number (must be 10 digits)")
+      .optional(),
+    email: z
+      .string()
+      .email("Invalid email format")
+      .optional(),
+    password: z
+      .string()
+      .min(1, "Password is required"),
+  })
+  .refine(
+    (data) => data.phoneNumber || data.email,
+    {
+      message: "Either phone number or email is required",
+    }
+  );
 
 export const adminLoginSchema = z.object({
   identifier: z
